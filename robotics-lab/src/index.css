@@ -1,0 +1,74 @@
+@import 'katex/dist/katex.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #0b0f17;
+  color: #f1f5f9;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Prevent accidental text selection while dragging 3D canvas or sliders on iPad */
+.no-touch-callout {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* Custom sleek engineering scrollbar */
+.lab-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lab-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.lab-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lab-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+.lab-scroll::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* KaTeX dark lab tuning */
+.katex {
+  font-size: 1.02em;
+  color: #e2e8f0;
+}
+
+.katex-display {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid #1e293b;
+  border-radius: 0.625rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

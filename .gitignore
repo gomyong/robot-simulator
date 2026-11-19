@@ -1,0 +1,22 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Node / Vite / Build artifacts
+node_modules/
+robotics-lab/node_modules/
+dist/
+robotics-lab/dist/
+dist-ssr/
+*.local
+*.log
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+.env
+.env.*

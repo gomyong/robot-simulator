@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="112" fill="#0B0F17"/>
+  <rect x="24" y="24" width="464" height="464" rx="92" stroke="#1E293B" stroke-width="4"/>
+  <!-- Engineering grid lines -->
+  <path d="M96 160H416M96 256H416M96 352H416M160 96V416M256 96V416M352 96V416" stroke="#1E293B" stroke-width="2" stroke-dasharray="6 8"/>
+  <!-- Stylized 2R Robotic Arm + ESP32 Node -->
+  <circle cx="152" cy="344" r="34" fill="#111827" stroke="#38BDF8" stroke-width="8"/>
+  <path d="M152 344L254 196L364 164" stroke="#38BDF8" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="254" cy="196" r="24" fill="#0B0F17" stroke="#10B981" stroke-width="8"/>
+  <circle cx="364" cy="164" r="18" fill="#38BDF8"/>
+  <circle cx="364" cy="164" r="34" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6 6" opacity="0.65"/>
+  <!-- Corner badge -->
+  <rect x="304" y="328" width="112" height="56" rx="14" fill="#161F30" stroke="#334155" stroke-width="3"/>
+  <text x="360" y="364" text-anchor="middle" fill="#38BDF8" font-family="monospace" font-size="24" font-weight="700">ESP32</text>
+</svg>
