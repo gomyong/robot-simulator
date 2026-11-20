@@ -32,6 +32,16 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+          'katex-vendor': ['katex'],
+        },
+      },
+    },
+  },
   server: {
     host: true,
     port: 5173,

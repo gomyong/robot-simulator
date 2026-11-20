@@ -16,6 +16,13 @@ export function SchematicPipOverlay({
   const isEspBoard = moduleId === 'day08_board' || moduleId === 'esp32';
   const isBasicCircuit = moduleId === 'day01_basics' || moduleId === 'day02_breadboard';
   const isDivider = moduleId === 'day05_divider' || moduleId === 'day07_project';
+  const isHbridge = moduleId === 'day14_hbridge';
+  const isMobileKin = moduleId === 'day20_mobile_kinematics' || moduleId === 'day27_encoder_odom';
+  const isAutonomy =
+    moduleId === 'day38_tf2_urdf' ||
+    moduleId === 'day40_mcl_particle' ||
+    moduleId === 'day41_slam_grid' ||
+    moduleId === 'day42_maze_project';
   const isRover =
     moduleId === 'day16_rover_project' ||
     moduleId === 'day34_fusion_project' ||
@@ -38,13 +45,19 @@ export function SchematicPipOverlay({
               ? '회로도 · 직류 + 저항 + LED'
               : isDivider
                 ? '회로도 · HC-SR04 5V→3.3V 분압'
-                : isRover
-                  ? '아키텍처 · 2S LiPo 전원 분리'
-                  : isSonar
-                    ? '회로도 · HC-SR04 ToF 배선'
-                    : isPid
-                      ? '제어 블록도 · 디지털 PID 루프'
-                      : '기구 도식 · 좌표계 변환'}
+                : isHbridge
+                  ? '회로도 · Q1~Q4 H-브리지 스위칭'
+                  : isMobileKin
+                    ? '기구/신호 · 차동주행 · 직교 엔코더'
+                    : isAutonomy
+                      ? '자율주행 · TF2 · MCL · SLAM 파이프라인'
+                      : isRover
+                        ? '아키텍처 · 2S LiPo 전원 분리'
+                        : isSonar
+                          ? '회로도 · HC-SR04 ToF 배선'
+                          : isPid
+                            ? '제어 블록도 · 디지털 PID 루프'
+                            : '기구 도식 · 좌표계 변환'}
         </span>
         <div className="flex items-center gap-1">
           <button
@@ -141,6 +154,56 @@ export function SchematicPipOverlay({
             <rect x="180" y="30" width="66" height="94" rx="4" fill="#FFFFFF" stroke="#0A2540" strokeWidth="1.5" />
             <text x="213" y="52" textAnchor="middle" fontSize="9" fontWeight="700" fill="#0A2540">ESP32</text>
             <text x="213" y="88" textAnchor="middle" fontSize="7.5" fontFamily="monospace" fill="#059669">3.3V 안전!</text>
+          </svg>
+        ) : isHbridge ? (
+          <svg viewBox="0 0 260 155" className="w-full select-none">
+            <rect x="6" y="6" width="248" height="143" rx="6" fill="#FAFBFD" stroke="#E6E8EC" />
+            <line x1="65" y1="26" x2="195" y2="26" stroke="#EF4444" strokeWidth="1.8" />
+            <text x="130" y="20" textAnchor="middle" fontSize="8" fontFamily="monospace" fill="#DC2626">VMOT 7.4V</text>
+            <line x1="85" y1="26" x2="85" y2="124" stroke="#334155" strokeWidth="1.5" />
+            <line x1="175" y1="26" x2="175" y2="124" stroke="#334155" strokeWidth="1.5" />
+            <rect x="70" y="38" width="30" height="18" rx="3" fill="#DCFCE7" stroke="#10B981" />
+            <text x="85" y="50" textAnchor="middle" fontSize="8" fontWeight="700" fill="#047857">Q1</text>
+            <rect x="160" y="38" width="30" height="18" rx="3" fill="#FFFFFF" stroke="#94A3B8" />
+            <text x="175" y="50" textAnchor="middle" fontSize="8" fontWeight="700" fill="#475569">Q3</text>
+            <line x1="85" y1="75" x2="175" y2="75" stroke="#0A2540" strokeWidth="1.6" />
+            <circle cx="130" cy="75" r="14" fill="#EEF2FF" stroke="#635BFF" strokeWidth="1.5" />
+            <text x="130" y="78" textAnchor="middle" fontSize="8.5" fontWeight="700" fill="#4338CA">M</text>
+            <rect x="70" y="94" width="30" height="18" rx="3" fill="#FFFFFF" stroke="#94A3B8" />
+            <text x="85" y="106" textAnchor="middle" fontSize="8" fontWeight="700" fill="#475569">Q2</text>
+            <rect x="160" y="94" width="30" height="18" rx="3" fill="#DCFCE7" stroke="#10B981" />
+            <text x="175" y="106" textAnchor="middle" fontSize="8" fontWeight="700" fill="#047857">Q4</text>
+            <line x1="65" y1="124" x2="195" y2="124" stroke="#475569" strokeWidth="1.8" />
+            <text x="130" y="138" textAnchor="middle" fontSize="7.5" fontFamily="monospace" fill="#475569">Q1+Q2 동시 ON 절대 금지</text>
+          </svg>
+        ) : isMobileKin ? (
+          <svg viewBox="0 0 260 155" className="w-full select-none">
+            <rect x="6" y="6" width="248" height="143" rx="6" fill="#FAFBFD" stroke="#E6E8EC" />
+            <rect x="24" y="34" width="66" height="84" rx="5" fill="#EEF2FF" stroke="#635BFF" />
+            <text x="57" y="70" textAnchor="middle" fontSize="8.5" fontWeight="700" fill="#4338CA">(v, ω)</text>
+            <text x="57" y="84" textAnchor="middle" fontSize="7" fontFamily="monospace" fill="#4338CA">v ± ωW/2</text>
+            <line x1="90" y1="76" x2="124" y2="76" stroke="#0A2540" strokeWidth="1.5" />
+            <rect x="124" y="34" width="112" height="84" rx="5" fill="#FFFFFF" stroke="#0A2540" />
+            <text x="180" y="56" textAnchor="middle" fontSize="8.5" fontWeight="700" fill="#0A2540">Ch A / B 위상차 90°</text>
+            <path d="M 136 86 H 152 V 72 H 168 V 86 H 184 V 72 H 200 V 86 H 222" fill="none" stroke="#0EA5E9" strokeWidth="1.4" />
+            <path d="M 144 104 H 160 V 90 H 176 V 104 H 192 V 90 H 208 V 104 H 224" fill="none" stroke="#F59E0B" strokeWidth="1.4" />
+            <text x="130" y="135" textAnchor="middle" fontSize="7.5" fontFamily="monospace" fill="#475569">정확한 Δs, Δθ 적분 (오도메트리)</text>
+          </svg>
+        ) : isAutonomy ? (
+          <svg viewBox="0 0 260 155" className="w-full select-none">
+            <rect x="6" y="6" width="248" height="143" rx="6" fill="#FAFBFD" stroke="#E6E8EC" />
+            <rect x="14" y="48" width="54" height="44" rx="4" fill="#ECFDF5" stroke="#10B981" />
+            <text x="41" y="68" textAnchor="middle" fontSize="8" fontWeight="700" fill="#047857">TF2</text>
+            <text x="41" y="80" textAnchor="middle" fontSize="6.8" fontFamily="monospace" fill="#047857">laser→base</text>
+            <line x1="68" y1="70" x2="92" y2="70" stroke="#0A2540" strokeWidth="1.4" />
+            <rect x="92" y="48" width="68" height="44" rx="4" fill="#EEF2FF" stroke="#635BFF" />
+            <text x="126" y="68" textAnchor="middle" fontSize="8" fontWeight="700" fill="#4338CA">MCL·SLAM</text>
+            <text x="126" y="80" textAnchor="middle" fontSize="6.8" fontFamily="monospace" fill="#4338CA">Loop Closure</text>
+            <line x1="160" y1="70" x2="184" y2="70" stroke="#0A2540" strokeWidth="1.4" />
+            <rect x="184" y="48" width="62" height="44" rx="4" fill="#FEF3C7" stroke="#D97706" />
+            <text x="215" y="68" textAnchor="middle" fontSize="8" fontWeight="700" fill="#92400E">A* + DWA</text>
+            <text x="215" y="80" textAnchor="middle" fontSize="6.8" fontFamily="monospace" fill="#92400E">C-Space 회피</text>
+            <text x="130" y="122" textAnchor="middle" fontSize="7.5" fontFamily="monospace" fill="#475569">ROS2 자율주행 좌표·지도·회피 스택</text>
           </svg>
         ) : isRover ? (
           <svg viewBox="0 0 260 155" className="w-full select-none">

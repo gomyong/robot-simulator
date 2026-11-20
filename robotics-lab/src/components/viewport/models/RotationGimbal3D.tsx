@@ -148,7 +148,7 @@ export function RotationGimbal3D({
       )}
 
       {/* Top Floating Telemetry */}
-      <Html position={[0, 2.15, 0]} center>
+      <Html position={[0, 2.15, 0]} center zIndexRange={[10, 0]}>
         <div
           className={`pointer-events-none whitespace-nowrap rounded-lg border px-2.5 py-1 font-mono text-[11px] font-semibold shadow-sm ${
             isGimbalLocked
