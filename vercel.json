@@ -1,5 +1,0 @@
-{
-  "installCommand": "npm --prefix robotics-lab install",
-  "buildCommand": "npm --prefix robotics-lab run build",
-  "outputDirectory": "robotics-lab/dist"
-}
