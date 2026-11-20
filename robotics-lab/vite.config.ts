@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
       manifest: {
         name: '로보틱스 디자인 스튜디오 (Robotics Studio)',
         short_name: '로보틱스 랩',
@@ -20,15 +20,27 @@ export default defineConfig({
         lang: 'ko',
         icons: [
           {
+            src: 'icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: 'icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+          {
             src: 'icon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable',
+            purpose: 'any',
           },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,woff2,json}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
       },
     }),
   ],
