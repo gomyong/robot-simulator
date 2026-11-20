@@ -7,14 +7,16 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { CameraPreset, LabPreviewState, ModuleId } from '../../types/lab';
 import { HardwareWorkbench } from '../hardware/HardwareWorkbench';
 import { ArmProject3D } from './models/ArmProject3D';
+import { BreadboardCircuit3D } from './models/BreadboardCircuit3D';
 import {
   ESP32_HOTSPOTS,
   Esp32Hardware3D,
-  Esp32Hotspot,
 } from './models/Esp32Hardware3D';
+import { HotspotInfo } from './models/HardwareParts3D';
 import { PidServoRig3D } from './models/PidServoRig3D';
 import { PlanarArm3D } from './models/PlanarArm3D';
 import { RotationGimbal3D } from './models/RotationGimbal3D';
+import { RoverChassis3D } from './models/RoverChassis3D';
 import { UltrasonicRig3D } from './models/UltrasonicRig3D';
 import { SchematicPipOverlay } from './SchematicPipOverlay';
 
@@ -39,20 +41,15 @@ const PRESET_VIEWS: Record<
 };
 
 const HARDWARE_MODULES = new Set<ModuleId>([
-  'day01_basics',
-  'day02_breadboard',
   'day03_digital',
   'day04_adc_pwm',
-  'day05_divider',
   'day06_power',
-  'day07_project',
   'day10_nonblocking',
   'day11_fsm',
   'day12_comms',
   'day13_actuators',
   'day14_hbridge',
   'day15_rtos_wireless',
-  'day16_rover_project',
   'day17_math',
   'day19_cad_tolerance',
   'day20_mobile_kinematics',
@@ -64,7 +61,6 @@ const HARDWARE_MODULES = new Set<ModuleId>([
   'day31_pid_advanced',
   'day32_trajectory',
   'day33_kalman',
-  'day34_fusion_project',
   'day35_python_bridge',
   'day36_path_planning',
   'day37_ros2_arch',
@@ -75,26 +71,39 @@ const HARDWARE_MODULES = new Set<ModuleId>([
   'day42_maze_project',
   'day43_pcb_design',
   'day44_debugging',
-  'day45_capstone',
 ]);
 
 type SpatialModuleId =
+  | 'day01_basics'
+  | 'day02_breadboard'
+  | 'day05_divider'
+  | 'day07_project'
   | 'day08_board'
   | 'esp32'
+  | 'day16_rover_project'
   | 'day18_rotation3d'
   | 'kinematics'
   | 'day25_arm_project'
   | 'ultrasonic'
-  | 'pid';
+  | 'pid'
+  | 'day34_fusion_project'
+  | 'day45_capstone';
 
 const MODULE_DEFAULT_ZOOM: Record<SpatialModuleId, number> = {
+  day01_basics: 74,
+  day02_breadboard: 82,
+  day05_divider: 66,
+  day07_project: 64,
   day08_board: 88,
   esp32: 88,
+  day16_rover_project: 74,
   day18_rotation3d: 82,
   kinematics: 58,
   day25_arm_project: 58,
   ultrasonic: 76,
   pid: 92,
+  day34_fusion_project: 74,
+  day45_capstone: 68,
 };
 
 function CameraRig({
@@ -181,7 +190,7 @@ export function LabViewport({
   const [presetTrigger, setPresetTrigger] = useState(0);
   const [showGrid, setShowGrid] = useState(true);
   const [showSchematicPip, setShowSchematicPip] = useState(true);
-  const [activeHotspot, setActiveHotspot] = useState<Esp32Hotspot | null>(null);
+  const [activeHotspot, setActiveHotspot] = useState<HotspotInfo | null>(null);
   const [focusGoal, setFocusGoal] = useState<{
     target: [number, number, number];
     zoom: number;
@@ -199,7 +208,7 @@ export function LabViewport({
     triggerPreset('iso');
   }, [activeModuleId]);
 
-  const handleSelectHotspot = (spot: Esp32Hotspot) => {
+  const handleSelectHotspot = (spot: HotspotInfo) => {
     setActiveHotspot(spot);
     setFocusGoal((prev) => ({
       target: spot.focusTarget,
@@ -207,7 +216,7 @@ export function LabViewport({
       seq: (prev?.seq ?? 0) + 1,
     }));
     if (activeModuleId === 'day08_board') {
-      const partMap: Record<Esp32Hotspot['id'], LabPreviewState['day08FocusPart']> = {
+      const partMap: Record<string, LabPreviewState['day08FocusPart']> = {
         wroom: 'wroom',
         antenna: 'wroom',
         cp2102: 'cp2102',
@@ -216,11 +225,12 @@ export function LabViewport({
         led: 'pins',
         pins: 'pins',
       };
-      onChangePreview({ day08FocusPart: partMap[spot.id] });
+      const mapped = partMap[spot.id];
+      if (mapped) onChangePreview({ day08FocusPart: mapped });
     }
   };
 
-  // Use Wokwi/Fritzing-grade Realistic Interactive Hardware Bench for Circuit & Board Labs
+  // Use Wokwi/Fritzing-grade Realistic Interactive Hardware Bench for Waveform/Logic/Grid Labs
   if (HARDWARE_MODULES.has(activeModuleId)) {
     return (
       <HardwareWorkbench
@@ -236,15 +246,37 @@ export function LabViewport({
 
   const spatialId = activeModuleId as SpatialModuleId;
   const moduleBadgeLabel: Record<SpatialModuleId, string> = {
+    day01_basics: 'Day 01 · 로봇 3요소 & LED 안전 회로 3D',
+    day02_breadboard: 'Day 02 · MB-102 브레드보드 내부 구리 레일 X-Ray 3D',
+    day05_divider: 'Day 05 · HC-SR04 5V → ESP32 3.3V 분압 회로 3D',
+    day07_project: 'Day 07 · 스마트 위험 감지기 통합 브레드보드 3D',
     day08_board: 'Day 08 · ESP32 DevKit V1 실물 3D 해부 & 핫스팟',
     esp32: 'Day 09 · ESP32 30-Pin 3D 인스펙터',
+    day16_rover_project: 'Day 16 · 2WD 무선 RC 로버 3D 조립 & 전원 분리',
     day18_rotation3d: 'Day 18 · SO(3)/SE(3) 오일러 짐벌락 & 쿼터니언 3D',
     kinematics: 'Day 21~22 · 2축 평면 로봇 팔 FK/IK',
     day25_arm_project: 'Day 25 · 로봇 팔 좌표·특이점·토크 3단계 검증 3D',
     ultrasonic: 'Day 26 · HC-SR04 초음파 레이더',
     pid: 'Day 30~31 · 디지털 PID 서보 벤치',
+    day34_fusion_project: 'Day 34 · 엔코더 PID + IMU Yaw 직진 보정 로버 3D',
+    day45_capstone: 'Day 45 · [졸업 캡스톤] 자율 픽앤플레이스 모바일 매니퓰레이터 3D',
   };
   const isEsp3D = spatialId === 'day08_board' || spatialId === 'esp32';
+  const isBreadboard3D =
+    spatialId === 'day01_basics' ||
+    spatialId === 'day02_breadboard' ||
+    spatialId === 'day05_divider' ||
+    spatialId === 'day07_project';
+  const isRover3D =
+    spatialId === 'day16_rover_project' ||
+    spatialId === 'day34_fusion_project' ||
+    spatialId === 'day45_capstone';
+  const supportsExploded =
+    isEsp3D ||
+    spatialId === 'day02_breadboard' ||
+    spatialId === 'day05_divider' ||
+    spatialId === 'day07_project' ||
+    (spatialId === 'day01_basics' && preview.day01Mode === 'circuit');
 
   return (
     <div className="no-touch-callout relative h-full w-full overflow-hidden bg-[#F4F5F7]">
@@ -302,6 +334,36 @@ export function LabViewport({
           color="#64748B"
         />
 
+        {isBreadboard3D && (
+          <BreadboardCircuit3D
+            moduleId={
+              spatialId as
+                | 'day01_basics'
+                | 'day02_breadboard'
+                | 'day05_divider'
+                | 'day07_project'
+            }
+            preview={preview}
+            sketchRunning={sketchRunning}
+            activeHotspotId={activeHotspot?.id ?? null}
+            onSelectHotspot={handleSelectHotspot}
+            onChangePreview={onChangePreview}
+          />
+        )}
+        {isRover3D && (
+          <RoverChassis3D
+            moduleId={
+              spatialId as
+                | 'day16_rover_project'
+                | 'day34_fusion_project'
+                | 'day45_capstone'
+            }
+            preview={preview}
+            sketchRunning={sketchRunning}
+            activeHotspotId={activeHotspot?.id ?? null}
+            onSelectHotspot={handleSelectHotspot}
+          />
+        )}
         {isEsp3D && (
           <Esp32Hardware3D
             exploded={preview.exploded > 0.1}
@@ -378,15 +440,42 @@ export function LabViewport({
             </span>
           </div>
           <p className="mt-0.5 pl-3.5 text-[11px] text-[#697386]">
-            {isEsp3D
-              ? '보드 위 핫스팟 라벨을 클릭하면 줌인되며, 코드 랩에서 실행 시 파란 LED가 점멸합니다'
+            {isEsp3D || isBreadboard3D || isRover3D
+              ? '부품 핫스팟을 클릭하면 줌인되며, 드래그·회전으로 입체 배선/조립을 확인하세요'
               : '아이소메트릭 시점 · 우측/하단 직접 실습 탭에서 조작'}
           </p>
         </div>
+
+        {spatialId === 'day01_basics' && (
+          <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-lg border border-[#E6E8EC] bg-white/95 p-0.5 backdrop-blur-sm">
+            <button
+              type="button"
+              onClick={() => onChangePreview({ day01Mode: 'anatomy' })}
+              className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition ${
+                preview.day01Mode === 'anatomy'
+                  ? 'bg-[#0A2540] text-white'
+                  : 'text-[#697386] hover:text-[#0A2540]'
+              }`}
+            >
+              로봇 3요소
+            </button>
+            <button
+              type="button"
+              onClick={() => onChangePreview({ day01Mode: 'circuit' })}
+              className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition ${
+                preview.day01Mode === 'circuit'
+                  ? 'bg-[#0A2540] text-white'
+                  : 'text-[#697386] hover:text-[#0A2540]'
+              }`}
+            >
+              LED 회로
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Floating Hotspot Inspector Card (Learn-ESP32 Style) */}
-      {isEsp3D && activeHotspot && (
+      {activeHotspot && (
         <div className="pointer-events-auto absolute left-4 top-16 z-10 w-[250px] rounded-xl border border-[#E6E8EC] bg-white/95 p-3 shadow-sm backdrop-blur-sm">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-1.5">
@@ -456,7 +545,7 @@ export function LabViewport({
         </div>
 
         <div className="pointer-events-auto flex items-center gap-1.5">
-          {isEsp3D && (
+          {supportsExploded && (
             <button
               type="button"
               onClick={onToggleExploded}
@@ -467,7 +556,7 @@ export function LabViewport({
               }`}
             >
               <Layers className="h-3.5 w-3.5" />
-              <span>내부 투시</span>
+              <span>{isEsp3D ? '내부 투시' : '구리 레일 X-Ray'}</span>
             </button>
           )}
           <button

@@ -94,6 +94,7 @@ interface Esp32Hardware3DProps {
   activeHotspotId: string | null;
   onSelectHotspot: (spot: Esp32Hotspot) => void;
   onSelectPin?: (pinId: string) => void;
+  showHotspots?: boolean;
 }
 
 export function Esp32Hardware3D({
@@ -103,6 +104,7 @@ export function Esp32Hardware3D({
   activeHotspotId,
   onSelectHotspot,
   onSelectPin,
+  showHotspots = true,
 }: Esp32Hardware3DProps) {
   const shieldRef = useRef<THREE.Group>(null);
   const [blinkOn, setBlinkOn] = useState(false);
@@ -390,7 +392,8 @@ export function Esp32Hardware3D({
       )}
 
       {/* Interactive 3D Hotspot Callouts (Learn-ESP32 Style) */}
-      {ESP32_HOTSPOTS.map((spot) => {
+      {showHotspots &&
+        ESP32_HOTSPOTS.map((spot) => {
         const isActive = activeHotspotId === spot.id;
         return (
           <Html
