@@ -1,16 +1,22 @@
 import { ContactShadows, Grid, OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Compass, Grid3X3, RotateCcw } from 'lucide-react';
+import { Compass, Cpu, Grid3X3, Layers, RotateCcw, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { CameraPreset, LabPreviewState, ModuleId } from '../../types/lab';
 import { HardwareWorkbench } from '../hardware/HardwareWorkbench';
 import { ArmProject3D } from './models/ArmProject3D';
+import {
+  ESP32_HOTSPOTS,
+  Esp32Hardware3D,
+  Esp32Hotspot,
+} from './models/Esp32Hardware3D';
 import { PidServoRig3D } from './models/PidServoRig3D';
 import { PlanarArm3D } from './models/PlanarArm3D';
 import { RotationGimbal3D } from './models/RotationGimbal3D';
 import { UltrasonicRig3D } from './models/UltrasonicRig3D';
+import { SchematicPipOverlay } from './SchematicPipOverlay';
 
 interface LabViewportProps {
   activeModuleId: ModuleId;
@@ -19,6 +25,7 @@ interface LabViewportProps {
   selectedPinId: string | null;
   onSelectPin: (pinId: string) => void;
   onToggleExploded: () => void;
+  sketchRunning?: boolean;
 }
 
 const PRESET_VIEWS: Record<
@@ -39,8 +46,6 @@ const HARDWARE_MODULES = new Set<ModuleId>([
   'day05_divider',
   'day06_power',
   'day07_project',
-  'day08_board',
-  'esp32',
   'day10_nonblocking',
   'day11_fsm',
   'day12_comms',
@@ -74,6 +79,8 @@ const HARDWARE_MODULES = new Set<ModuleId>([
 ]);
 
 type SpatialModuleId =
+  | 'day08_board'
+  | 'esp32'
   | 'day18_rotation3d'
   | 'kinematics'
   | 'day25_arm_project'
@@ -81,6 +88,8 @@ type SpatialModuleId =
   | 'pid';
 
 const MODULE_DEFAULT_ZOOM: Record<SpatialModuleId, number> = {
+  day08_board: 88,
+  esp32: 88,
   day18_rotation3d: 82,
   kinematics: 58,
   day25_arm_project: 58,
@@ -92,10 +101,12 @@ function CameraRig({
   preset,
   presetTrigger,
   targetZoom,
+  focusGoal,
 }: {
   preset: CameraPreset;
   presetTrigger: number;
   targetZoom: number;
+  focusGoal: { target: [number, number, number]; zoom: number; seq: number } | null;
 }) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
   const { camera } = useThree();
@@ -111,6 +122,15 @@ function CameraRig({
     desiredZoom.current = targetZoom;
     animatingRef.current = true;
   }, [preset, presetTrigger, targetZoom]);
+
+  useEffect(() => {
+    if (!focusGoal) return;
+    const [tx, ty, tz] = focusGoal.target;
+    desiredTarget.current.set(tx, ty, tz);
+    desiredPos.current.set(tx + 4.5, ty + 5.2, tz + 4.5);
+    desiredZoom.current = focusGoal.zoom;
+    animatingRef.current = true;
+  }, [focusGoal]);
 
   useFrame(() => {
     if (!animatingRef.current || !controlsRef.current) return;
@@ -155,12 +175,22 @@ export function LabViewport({
   selectedPinId,
   onSelectPin,
   onToggleExploded,
+  sketchRunning = false,
 }: LabViewportProps) {
   const [preset, setPreset] = useState<CameraPreset>('iso');
   const [presetTrigger, setPresetTrigger] = useState(0);
   const [showGrid, setShowGrid] = useState(true);
+  const [showSchematicPip, setShowSchematicPip] = useState(true);
+  const [activeHotspot, setActiveHotspot] = useState<Esp32Hotspot | null>(null);
+  const [focusGoal, setFocusGoal] = useState<{
+    target: [number, number, number];
+    zoom: number;
+    seq: number;
+  } | null>(null);
 
   const triggerPreset = (next: CameraPreset) => {
+    setFocusGoal(null);
+    setActiveHotspot(null);
     setPreset(next);
     setPresetTrigger((n) => n + 1);
   };
@@ -168,6 +198,27 @@ export function LabViewport({
   useEffect(() => {
     triggerPreset('iso');
   }, [activeModuleId]);
+
+  const handleSelectHotspot = (spot: Esp32Hotspot) => {
+    setActiveHotspot(spot);
+    setFocusGoal((prev) => ({
+      target: spot.focusTarget,
+      zoom: spot.focusZoom,
+      seq: (prev?.seq ?? 0) + 1,
+    }));
+    if (activeModuleId === 'day08_board') {
+      const partMap: Record<Esp32Hotspot['id'], LabPreviewState['day08FocusPart']> = {
+        wroom: 'wroom',
+        antenna: 'wroom',
+        cp2102: 'cp2102',
+        ams1117: 'ams1117',
+        buttons: 'buttons',
+        led: 'pins',
+        pins: 'pins',
+      };
+      onChangePreview({ day08FocusPart: partMap[spot.id] });
+    }
+  };
 
   // Use Wokwi/Fritzing-grade Realistic Interactive Hardware Bench for Circuit & Board Labs
   if (HARDWARE_MODULES.has(activeModuleId)) {
@@ -185,12 +236,15 @@ export function LabViewport({
 
   const spatialId = activeModuleId as SpatialModuleId;
   const moduleBadgeLabel: Record<SpatialModuleId, string> = {
+    day08_board: 'Day 08 · ESP32 DevKit V1 실물 3D 해부 & 핫스팟',
+    esp32: 'Day 09 · ESP32 30-Pin 3D 인스펙터',
     day18_rotation3d: 'Day 18 · SO(3)/SE(3) 오일러 짐벌락 & 쿼터니언 3D',
     kinematics: 'Day 21~22 · 2축 평면 로봇 팔 FK/IK',
     day25_arm_project: 'Day 25 · 로봇 팔 좌표·특이점·토크 3단계 검증 3D',
     ultrasonic: 'Day 26 · HC-SR04 초음파 레이더',
     pid: 'Day 30~31 · 디지털 PID 서보 벤치',
   };
+  const isEsp3D = spatialId === 'day08_board' || spatialId === 'esp32';
 
   return (
     <div className="no-touch-callout relative h-full w-full overflow-hidden bg-[#F4F5F7]">
@@ -248,6 +302,21 @@ export function LabViewport({
           color="#64748B"
         />
 
+        {isEsp3D && (
+          <Esp32Hardware3D
+            exploded={preview.exploded > 0.1}
+            wifiActive={preview.wifiActive}
+            sketchRunning={sketchRunning}
+            activeHotspotId={
+              activeHotspot?.id ??
+              (spatialId === 'day08_board'
+                ? (ESP32_HOTSPOTS.find((h) => h.id === preview.day08FocusPart)?.id ?? null)
+                : null)
+            }
+            onSelectHotspot={handleSelectHotspot}
+            onSelectPin={onSelectPin}
+          />
+        )}
         {spatialId === 'day18_rotation3d' && (
           <RotationGimbal3D
             mode={preview.day18Mode}
@@ -295,24 +364,66 @@ export function LabViewport({
           preset={preset}
           presetTrigger={presetTrigger}
           targetZoom={MODULE_DEFAULT_ZOOM[spatialId]}
+          focusGoal={focusGoal}
         />
       </Canvas>
 
       {/* Top Minimal HUD */}
-      <div className="pointer-events-none absolute left-4 top-3.5 right-4">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#635BFF]" />
-          <span className="text-xs font-semibold tracking-tight text-[#0A2540]">
-            {moduleBadgeLabel[spatialId]}
-          </span>
+      <div className="pointer-events-none absolute left-4 top-3.5 right-4 z-20 flex items-start justify-between gap-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#635BFF]" />
+            <span className="text-xs font-semibold tracking-tight text-[#0A2540]">
+              {moduleBadgeLabel[spatialId]}
+            </span>
+          </div>
+          <p className="mt-0.5 pl-3.5 text-[11px] text-[#697386]">
+            {isEsp3D
+              ? '보드 위 핫스팟 라벨을 클릭하면 줌인되며, 코드 랩에서 실행 시 파란 LED가 점멸합니다'
+              : '아이소메트릭 시점 · 우측/하단 직접 실습 탭에서 조작'}
+          </p>
         </div>
-        <p className="mt-0.5 pl-3.5 text-[11px] text-[#697386]">
-          아이소메트릭 시점 · 우측/하단 직접 실습 탭에서 조작
-        </p>
       </div>
 
+      {/* Floating Hotspot Inspector Card (Learn-ESP32 Style) */}
+      {isEsp3D && activeHotspot && (
+        <div className="pointer-events-auto absolute left-4 top-16 z-10 w-[250px] rounded-xl border border-[#E6E8EC] bg-white/95 p-3 shadow-sm backdrop-blur-sm">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: activeHotspot.color }}
+              />
+              <span className="text-xs font-semibold text-[#0A2540]">
+                {activeHotspot.title}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => triggerPreset('iso')}
+              className="rounded p-0.5 text-[#697386] hover:bg-[#F1F3F6] hover:text-[#0A2540]"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-[#425466]">
+            {activeHotspot.desc}
+          </p>
+        </div>
+      )}
+
+      {/* Floating 2D Schematic PIP Overlay (Bottom Right above Toolbar) */}
+      {showSchematicPip && (
+        <div className="pointer-events-none absolute bottom-14 right-4 z-10">
+          <SchematicPipOverlay
+            moduleId={activeModuleId}
+            onClose={() => setShowSchematicPip(false)}
+          />
+        </div>
+      )}
+
       {/* Bottom Camera Preset Strip */}
-      <div className="pointer-events-none absolute bottom-3.5 left-4 right-4 flex items-center justify-between gap-2">
+      <div className="pointer-events-none absolute bottom-3.5 left-4 right-4 z-20 flex items-center justify-between gap-2">
         <div className="pointer-events-auto flex items-center gap-0.5 rounded-lg border border-[#E6E8EC] bg-white/90 p-0.5 backdrop-blur-sm">
           {(
             [
@@ -326,7 +437,7 @@ export function LabViewport({
               type="button"
               onClick={() => triggerPreset(item.id)}
               className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition ${
-                preset === item.id
+                preset === item.id && !focusGoal
                   ? 'bg-[#0A2540] text-white'
                   : 'text-[#697386] hover:text-[#0A2540]'
               }`}
@@ -344,19 +455,47 @@ export function LabViewport({
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowGrid((v) => !v)}
-          className={`pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium backdrop-blur-sm transition ${
-            showGrid
-              ? 'border-[#E6E8EC] bg-white/90 text-[#0A2540]'
-              : 'border-[#E6E8EC] bg-white/60 text-[#697386]'
-          }`}
-        >
-          <Grid3X3 className="h-3.5 w-3.5 text-[#697386]" />
-          <span className="hidden sm:inline">그리드</span>
-          <Compass className="h-3.5 w-3.5 text-[#697386] sm:hidden" />
-        </button>
+        <div className="pointer-events-auto flex items-center gap-1.5">
+          {isEsp3D && (
+            <button
+              type="button"
+              onClick={onToggleExploded}
+              className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium backdrop-blur-sm transition ${
+                preview.exploded > 0.1
+                  ? 'border-[#635BFF] bg-[#635BFF] text-white'
+                  : 'border-[#E6E8EC] bg-white/90 text-[#0A2540]'
+              }`}
+            >
+              <Layers className="h-3.5 w-3.5" />
+              <span>내부 투시</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowSchematicPip((v) => !v)}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium backdrop-blur-sm transition ${
+              showSchematicPip
+                ? 'border-[#0A2540] bg-[#0A2540] text-white'
+                : 'border-[#E6E8EC] bg-white/90 text-[#0A2540]'
+            }`}
+          >
+            <Cpu className="h-3.5 w-3.5" />
+            <span>회로도</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowGrid((v) => !v)}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-medium backdrop-blur-sm transition ${
+              showGrid
+                ? 'border-[#E6E8EC] bg-white/90 text-[#0A2540]'
+                : 'border-[#E6E8EC] bg-white/60 text-[#697386]'
+            }`}
+          >
+            <Grid3X3 className="h-3.5 w-3.5 text-[#697386]" />
+            <span className="hidden sm:inline">그리드</span>
+            <Compass className="h-3.5 w-3.5 text-[#697386] sm:hidden" />
+          </button>
+        </div>
       </div>
     </div>
   );

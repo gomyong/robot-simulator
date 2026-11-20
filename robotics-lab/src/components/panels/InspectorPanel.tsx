@@ -22,6 +22,8 @@ interface InspectorPanelProps {
   onToggleMission: (missionId: string) => void;
   solvedCodeChallenges: string[];
   onSolveCodeChallenge: (moduleId: ModuleId) => void;
+  sketchRunning: boolean;
+  onToggleSketch: () => void;
 }
 
 const TABS: { id: TabId; label: string }[] = [
@@ -47,6 +49,8 @@ export function InspectorPanel({
   onToggleMission,
   solvedCodeChallenges,
   onSolveCodeChallenge,
+  sketchRunning,
+  onToggleSketch,
 }: InspectorPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showMissions, setShowMissions] = useState(true);
@@ -186,6 +190,8 @@ export function InspectorPanel({
             isCodeSolved={solvedCodeChallenges.includes(module.id)}
             onSolveCodeChallenge={onSolveCodeChallenge}
             onSelectTab={onSelectTab}
+            sketchRunning={sketchRunning}
+            onToggleSketch={onToggleSketch}
           />
         )}
         {activeTab === 'quiz' && (

@@ -61,6 +61,7 @@ export function App() {
   const [activeModuleId, setActiveModuleId] = useState<ModuleId>('day01_basics');
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [selectedPinId, setSelectedPinId] = useState<string | null>('GPIO32');
+  const [sketchRunning, setSketchRunning] = useState(false);
   const [preview, setPreview] = useState<LabPreviewState>({
     exploded: 0,
     wifiActive: false,
@@ -280,6 +281,7 @@ export function App() {
   ]);
 
   const handleOpenLab = (moduleId: ModuleId) => {
+    setSketchRunning(false);
     setActiveModuleId(moduleId);
     setActiveTab('overview');
     setActiveView('lab');
@@ -313,6 +315,7 @@ export function App() {
   };
 
   const handleSelectModule = (id: ModuleId) => {
+    setSketchRunning(false);
     setActiveModuleId(id);
     if (id !== 'esp32' && activeTab === 'pinout') {
       setActiveTab('overview');
@@ -785,6 +788,7 @@ export function App() {
               onToggleExploded={() =>
                 handleChangePreview({ exploded: preview.exploded > 0.1 ? 0 : 1 })
               }
+              sketchRunning={sketchRunning}
             />
           </section>
 
@@ -807,6 +811,8 @@ export function App() {
               onToggleMission={toggleMission}
               solvedCodeChallenges={progress.solvedCodeChallenges}
               onSolveCodeChallenge={handleSolveCodeChallenge}
+              sketchRunning={sketchRunning}
+              onToggleSketch={() => setSketchRunning((v) => !v)}
             />
           </section>
         </main>
