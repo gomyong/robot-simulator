@@ -89,8 +89,8 @@ export function PidServoRig3D({ setpointDeg, kp, ki, kd }: PidServoRig3DProps) {
         <meshStandardMaterial color="#1E293B" metalness={0.5} roughness={0.4} />
       </mesh>
 
-      <Html position={[0, -0.95, 0.35]} center distanceFactor={8}>
-        <div className="pointer-events-none whitespace-nowrap rounded-md border border-amber-400/50 bg-slate-950/90 px-2.5 py-0.5 font-mono text-[11px] text-amber-200 shadow">
+      <Html position={[0, -0.95, 0.35]} center>
+        <div className="pointer-events-none whitespace-nowrap rounded-md border border-[#E6E8EC] bg-white/95 px-2 py-0.5 font-mono text-[11px] font-medium text-[#0A2540]">
           목표각 {setpointDeg}° · Kp={kp.toFixed(1)} Ki={ki.toFixed(1)} Kd={kd.toFixed(2)}
         </div>
       </Html>

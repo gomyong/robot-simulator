@@ -9,11 +9,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: '로보틱스 디자인 랩 (Robotics Lab)',
+        name: '로보틱스 디자인 스튜디오 (Robotics Studio)',
         short_name: '로보틱스 랩',
-        description: 'ESP32 하드웨어 · 2축 기구학 · 초음파 센서 · PID 제어를 3D로 학습하는 인터랙티브 엔지니어링 랩',
-        theme_color: '#0B0F17',
-        background_color: '#0B0F17',
+        description:
+          '전기 기초부터 ESP32, 기구학, 제어, ROS 2, SLAM까지 45일 아이소메트릭 인터랙티브 로보틱스 학습 스튜디오',
+        theme_color: '#F6F7F9',
+        background_color: '#F6F7F9',
         display: 'standalone',
         orientation: 'any',
         lang: 'ko',

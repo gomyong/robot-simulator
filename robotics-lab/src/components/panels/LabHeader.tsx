@@ -1,109 +1,153 @@
-import { Cpu, Smartphone, Trophy } from 'lucide-react';
+import { Smartphone } from 'lucide-react';
 import { useState } from 'react';
 import { LAB_MODULES } from '../../data/curriculum';
-import { ModuleId } from '../../types/lab';
+import { AppView, ModuleId } from '../../types/lab';
+import { PixelMascot } from '../PixelMascot';
 
 interface LabHeaderProps {
+  activeView: AppView;
+  onSelectView: (view: AppView) => void;
   activeModuleId: ModuleId;
   onSelectModule: (id: ModuleId) => void;
+  exp: number;
+  completedDaysCount: number;
   totalCorrect: number;
   totalQuestions: number;
 }
 
 export function LabHeader({
+  activeView,
+  onSelectView,
   activeModuleId,
   onSelectModule,
+  exp,
+  completedDaysCount,
   totalCorrect,
   totalQuestions,
 }: LabHeaderProps) {
   const [showPwaTip, setShowPwaTip] = useState(false);
 
   return (
-    <header className="relative z-20 border-b border-slate-800 bg-[#0B0F17]/95 px-3 py-2 backdrop-blur-md sm:px-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        {/* Brand */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-500/35 bg-sky-500/15 text-sky-400">
-            <Cpu className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-sm font-bold tracking-tight text-slate-100 sm:text-base">
-                로보틱스 디자인 랩
-              </h1>
-              <span className="rounded-md border border-sky-500/30 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-sky-300">
-                M1 코어
-              </span>
-            </div>
-            <p className="hidden text-[11px] text-slate-400 sm:block">
-              ESP32 하드웨어 · 2축 기구학 · 초음파 ToF · 디지털 PID
-            </p>
-          </div>
+    <header className="relative z-20 border-b border-[#E6E8EC] bg-[#F7F8FA]">
+      <div className="flex h-12 items-center justify-between gap-3 px-3 sm:px-5">
+        {/* Left: Minimal Brand + Segmented View Switch */}
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => onSelectView('roadmap')}
+            className="flex items-center gap-2 text-left transition hover:opacity-80"
+          >
+            <PixelMascot mood="idle" size="sm" />
+            <span className="text-sm font-semibold tracking-tight text-[#0A2540]">
+              Robotics Lab
+            </span>
+          </button>
+
+          <span className="hidden h-4 w-px bg-[#E6E8EC] sm:block" />
+
+          <nav
+            aria-label="화면 전환"
+            className="flex items-center gap-1 rounded-lg bg-[#ECEEF2] p-0.5"
+          >
+            <button
+              type="button"
+              onClick={() => onSelectView('roadmap')}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                activeView === 'roadmap'
+                  ? 'bg-white text-[#0A2540] shadow-[0_1px_2px_rgba(10,37,64,0.06)]'
+                  : 'text-[#697386] hover:text-[#0A2540]'
+              }`}
+            >
+              커리큘럼
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectView('lab')}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                activeView === 'lab'
+                  ? 'bg-white text-[#0A2540] shadow-[0_1px_2px_rgba(10,37,64,0.06)]'
+                  : 'text-[#697386] hover:text-[#0A2540]'
+              }`}
+            >
+              3D 실습실
+            </button>
+          </nav>
         </div>
 
-        {/* Status + iPad PWA Guide */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900/90 px-2.5 py-1.5 text-xs">
-            <Trophy className="h-3.5 w-3.5 text-amber-400" />
-            <span className="font-mono font-semibold text-slate-200">
-              {totalCorrect}/{totalQuestions}
+        {/* Right: Quiet Monospace Telemetry + iPad Install */}
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-2.5 font-mono text-[11px] tabular-nums text-[#697386] sm:flex">
+            <span>
+              Day <strong className="font-semibold text-[#0A2540]">{completedDaysCount}</strong>/45
             </span>
-            <span className="hidden text-slate-400 sm:inline">퀴즈</span>
+            <span className="text-[#D0D5DD]">·</span>
+            <span>
+              Quiz <strong className="font-semibold text-[#0A2540]">{totalCorrect}</strong>/{totalQuestions}
+            </span>
+            <span className="text-[#D0D5DD]">·</span>
+            <span className="font-semibold text-[#635BFF]">{exp} EXP</span>
           </div>
 
           <button
             type="button"
             onClick={() => setShowPwaTip((v) => !v)}
-            className="flex min-h-[38px] items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-900 px-2.5 text-xs font-medium text-slate-300 transition hover:border-sky-500/50 hover:text-sky-200"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-[#425466] transition hover:bg-[#ECEEF2] hover:text-[#0A2540]"
           >
-            <Smartphone className="h-3.5 w-3.5 text-sky-400" />
-            <span className="hidden sm:inline">iPad 앱 설치</span>
+            <Smartphone className="h-3.5 w-3.5 text-[#697386]" />
+            <span className="hidden md:inline">iPad 앱 설치</span>
           </button>
         </div>
       </div>
 
-      {/* Horizontal Module Selector Pills (Scrollable on narrow iPad portrait) */}
-      <nav
-        aria-label="학습 모듈 선택"
-        className="lab-scroll mt-2 flex items-center gap-1.5 overflow-x-auto pb-0.5"
-      >
-        {LAB_MODULES.map((mod) => {
-          const active = mod.id === activeModuleId;
-          return (
-            <button
-              key={mod.id}
-              type="button"
-              onClick={() => onSelectModule(mod.id)}
-              className={`min-h-[40px] shrink-0 rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
-                active
-                  ? 'border-sky-400/60 bg-sky-500/15 text-sky-200 shadow-[0_0_16px_rgba(56,189,248,0.12)]'
-                  : 'border-slate-800 bg-slate-900/70 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-              }`}
-            >
-              {mod.shortTitle}
-            </button>
-          );
-        })}
-      </nav>
+      {/* Sub-navigation strip inside Lab View (Underline tabs, zero cards) */}
+      {activeView === 'lab' && (
+        <nav
+          aria-label="실습 모듈 선택"
+          className="lab-scroll flex items-center gap-5 overflow-x-auto border-t border-[#E6E8EC] bg-white px-4 sm:px-5"
+        >
+          {LAB_MODULES.map((mod) => {
+            const active = mod.id === activeModuleId;
+            return (
+              <button
+                key={mod.id}
+                type="button"
+                onClick={() => onSelectModule(mod.id)}
+                className={`relative shrink-0 py-2.5 text-xs font-medium transition ${
+                  active
+                    ? 'text-[#0A2540]'
+                    : 'text-[#697386] hover:text-[#0A2540]'
+                }`}
+              >
+                {mod.shortTitle}
+                {active && (
+                  <span className="absolute inset-x-0 bottom-0 h-[2px] bg-[#635BFF]" />
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
-      {/* Lightweight iPad PWA Tip Popover */}
+      {/* Minimal Floating PWA Tip */}
       {showPwaTip && (
-        <div className="absolute right-3 top-14 z-30 w-72 rounded-xl border border-slate-700 bg-slate-900/95 p-3.5 text-xs text-slate-300 shadow-2xl backdrop-blur-md">
+        <div className="absolute right-4 top-12 z-30 w-72 rounded-xl border border-[#E6E8EC] bg-white p-4 text-xs text-[#425466] shadow-[0_16px_36px_rgba(10,37,64,0.12)]">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-sky-300">iPad Safari PWA 설치 방법</span>
+            <span className="font-semibold text-[#0A2540]">
+              iPad Safari 앱 설치
+            </span>
             <button
               type="button"
               onClick={() => setShowPwaTip(false)}
-              className="text-slate-400 hover:text-slate-200"
+              className="text-[11px] font-medium text-[#697386] hover:text-[#0A2540]"
             >
               닫기
             </button>
           </div>
-          <ol className="mt-2 list-decimal space-y-1 pl-4 text-[11px] leading-relaxed text-slate-400">
-            <li>iPad Safari에서 이 앱 주소를 엽니다.</li>
-            <li>상단 공유 버튼(네모+위 화살표)을 탭합니다.</li>
+          <ol className="mt-2.5 list-decimal space-y-1.5 pl-4 text-[11px] leading-relaxed text-[#425466]">
+            <li>iPad Safari에서 이 페이지를 엽니다.</li>
+            <li>상단 공유 버튼을 탭합니다.</li>
             <li>
-              <strong className="text-slate-200">홈 화면에 추가</strong>를 선택하면 전체 화면 앱처럼 오프라인에서도 실행됩니다.
+              <strong className="text-[#0A2540]">홈 화면에 추가</strong>를 선택하면 오프라인 앱으로 동작합니다.
             </li>
           </ol>
         </div>

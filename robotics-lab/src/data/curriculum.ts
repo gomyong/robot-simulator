@@ -1,16 +1,234 @@
 import { LabModule } from '../types/lab';
+import { PHASE1_EXTRA_MODULES } from './phase1ExtraModules';
+import { PHASE2_MODULES } from './phase2Modules';
+import { PHASE3_MODULES } from './phase3Modules';
+import { PHASE4_MODULES } from './phase4Modules';
+import { PHASE5_MODULES } from './phase5Modules';
+import { PHASE6_MODULES } from './phase6Modules';
 
-export const LAB_MODULES: LabModule[] = [
+const BASE_LAB_MODULES: LabModule[] = [
+  {
+    id: 'day01_basics',
+    order: 0,
+    dayLabel: 'Day 01',
+    phaseLabel: 'Phase 1 · 전기/보드 기초',
+    title: '로봇의 해부학 & 직류 전기 · 옴의 법칙',
+    shortTitle: 'D01 · 전기/LED',
+    subtitle: '센서–두뇌–액추에이터 3요소 · 전압/전류/저항 · LED 보호 저항',
+    badge: '왕초보 첫걸음',
+    milestoneTag: 'Day 01 인터랙티브 회로',
+    failFirstHook:
+      '5V 전원이나 보드 핀에 LED를 저항 없이 바로 꽂으면 전류가 수백 mA로 치솟아 1초 만에 LED가 "퍽" 하고 타며 보드 핀도 손상됩니다.',
+    beginnerAnalogy:
+      '전압(V)은 물탱크 높이(수압), 전류(A)는 호스에 흐르는 물의 양, 저항(Ω)은 호스를 좁혀 물살을 안전하게 조절하는 밸브입니다.',
+    overviewSummary:
+      '로봇은 거창한 기계가 아니라 [감각(센서) → 판단(두뇌 MCU) → 움직임(액추에이터)]의 반복 루프입니다. 이 신호들이 전선을 따라 흐르려면 전기의 3대장(전압 V, 전류 I, 저항 R)을 안전하게 다룰 줄 알아야 보드를 태우지 않습니다.',
+    guidedMissions: [
+      {
+        id: 'd01-anatomy',
+        title: '로봇 해부도에서 센서·두뇌·액추에이터 클릭하기',
+        hint: '좌측/상단 캔버스의 로봇 부위를 눌러 신호 흐름을 확인하세요.',
+      },
+      {
+        id: 'd01-overcurrent',
+        title: '회로 실험실에서 저항을 0Ω으로 낮춰 과전류 경고 체험하기',
+        hint: '실험실 상단 "직류 회로" 모드 → 0Ω(직결) 버튼을 눌러보세요.',
+      },
+      {
+        id: 'd01-safe-led',
+        title: '저항값을 맞춰 안전 구간(5~20mA)으로 LED 켜기',
+        hint: '220Ω 또는 슬라이더로 전류가 초록색 SAFE 구간에 들어오게 맞추세요.',
+      },
+    ],
+    highlights: [
+      {
+        title: '로봇의 3요소: 센서 → 두뇌 → 액추에이터',
+        body: '초음파·카메라(센서)가 세상을 읽고, ESP32(두뇌)가 코드로 판단한 뒤, 모터·LED·서보(액추에이터)가 물리적으로 반응합니다. 어떤 거대한 휴머노이드도 이 루프의 확장입니다.',
+        tone: 'cyan',
+      },
+      {
+        title: '옴의 법칙 V = I × R 과 전류 제한',
+        body: '전압(V)을 고정했을 때 저항(R)이 0에 가까워지면 전류(I = V/R)가 무한대로 치솟습니다(합선/단락). 부품을 보호하려면 반드시 적절한 저항으로 전류 상한을 막아주어야 합니다.',
+        tone: 'emerald',
+      },
+      {
+        title: 'ESP32 핀 20mA 규칙 & LED 순방향 전압(Vf)',
+        body: '일반 빨강 LED는 약 2.0V만 넘으면 전류가 급증하며 10~20mA에서 밝게 켜집니다. ESP32 GPIO 핀의 권장 최대 전류도 20mA이므로, 5V나 3.3V에서 남은 전압을 저항이 흡수해 주어야 합니다.',
+        tone: 'rose',
+      },
+    ],
+    formulas: [
+      {
+        title: '옴의 법칙 (Ohm’s Law)',
+        latex: String.raw`V = I \cdot R \quad \Longleftrightarrow \quad I = \frac{V}{R}`,
+        description:
+          '전류 I(A)는 전압 V(V)에 비례하고 저항 R(Ω)에 반비례합니다. (1 A = 1,000 mA)',
+      },
+      {
+        title: 'LED 직렬 보호 저항 계산식',
+        latex: String.raw`R = \frac{V_{\text{source}} - V_f}{I_{\text{target}}}`,
+        description:
+          '예: 5V 전원에서 빨강 LED(Vf = 2.0V)에 15mA(0.015A)를 흘리려면 R = (5 - 2) / 0.015 = 200Ω → 표준 220Ω 저항 선택!',
+      },
+      {
+        title: '소비 전력 (발열 체크)',
+        latex: String.raw`P = V \cdot I = I^2 R`,
+        description:
+          '일반 소형 1/4W(250mW) 저항은 0.25W 이상 열이 나면 타버립니다.',
+      },
+    ],
+    specs: [
+      { label: 'ESP32 핀 전압', value: '3.3 V', note: 'USB·아두이노는 5.0V', tone: 'cyan' },
+      { label: '안전 LED 전류', value: '5 ~ 20 mA', note: 'GPIO 핀 권장 한계', tone: 'emerald' },
+      { label: '빨강/파랑 LED Vf', value: '2.0V / 3.2V', note: '색상별 전압 강하 차이', tone: 'amber' },
+      { label: '직결 (0Ω) 위험', value: '> 30 mA POP!', note: 'LED·MCU 핀 소손 위험', tone: 'rose' },
+    ],
+    wiringNotes: [
+      {
+        signal: '전원 플러스 (+ / VCC)',
+        pin: '3.3V 또는 5V → 보호 저항 한쪽 다리',
+        detail: '항상 전류가 LED로 들어가기 전(또는 나온 후) 직렬로 보호 저항(220Ω~330Ω)을 거칩니다.',
+      },
+      {
+        signal: 'LED 극성 구분 (중요!)',
+        pin: '긴 다리(+) 애노드 · 짧은 다리(-) 캐소드',
+        detail: 'LED는 다이오드이므로 거꾸로 꽂으면 불이 켜지지 않습니다. 플라스틱 테두리의 깎인 평평한 면이 (-)입니다.',
+      },
+      {
+        signal: '접지 (- / GND)',
+        pin: 'LED 짧은 다리 → 보드 GND',
+        detail: '전기는 +에서 출발해 반드시 GND(-)로 돌아오는 닫힌 고리(폐회로)를 만들어야 흐릅니다.',
+        warning: '전원 +와 GND를 부품 없이 직접 이으면 합선(Short)으로 배터리가 과열됩니다.',
+      },
+    ],
+    codeTitle: 'day01_ohm_led_safety.ino',
+    codeLanguage: 'cpp',
+    codeSnippet: `// Day 01: 안전한 LED 점등 & 옴의 법칙 출력
+// 하드웨어: GPIO 13 -> [220Ω 보호 저항] -> LED(+) -> LED(-) -> GND
+
+const int LED_PIN = 13;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT); // 핀을 출력(전압 공급) 모드로 설정
+
+  float Vs = 3.3;     // ESP32 로직 전압 (V)
+  float Vf = 2.0;     // 빨강 LED 순방향 전압 강하 (V)
+  float R  = 220.0;   // 직렬 보호 저항 (Ω)
+  float current_mA = ((Vs - Vf) / R) * 1000.0;
+
+  Serial.printf("예상 전류: %.2f mA (권장 20mA 이하 안전!)\\n", current_mA);
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH); // 3.3V 출력 -> LED ON
+  delay(500);
+  digitalWrite(LED_PIN, LOW);  // 0V 출력   -> LED OFF
+  delay(500);
+}`,
+    codeChallenge: {
+      prompt: 'LED를 제어하려고 GPIO 13번 핀에 HIGH 신호를 줬는데 불이 전혀 안 들어옵니다. 아래 setup()의 버그를 고쳐보세요!',
+      buggyLine: 'pinMode(LED_PIN, INPUT); // 실수로 입력 모드로 설정함!',
+      options: [
+        'pinMode(LED_PIN, OUTPUT);',
+        'digitalWrite(LED_PIN, INPUT);',
+        'analogRead(LED_PIN);',
+      ],
+      correctIndex: 0,
+      explanation:
+        'LED나 모터처럼 보드가 바깥으로 전기를 내보내야 할 때는 반드시 pinMode(핀, OUTPUT)으로 설정해야 전류를 공급할 수 있습니다.',
+    },
+    quizzes: [
+      {
+        id: 'Q0-1',
+        question: '모든 로봇이 주변 환경을 인식하고 움직이기 위해 반복하는 기본 3요소 루프의 올바른 순서는?',
+        options: [
+          '액추에이터 → 전원 → 센서',
+          '센서(감각) → 마이크로컨트롤러(두뇌) → 액추에이터(근육)',
+          '모터 → 저항 → 배터리',
+          'Wi-Fi → LED → 브레드보드',
+        ],
+        correctIndex: 1,
+        explanation:
+          '로봇은 센서로 환경 정보를 읽고(Sense), MCU 두뇌가 판단해(Think), 모터·서보·LED 등 액추에이터로 행동(Act)하는 루프를 반복합니다.',
+      },
+      {
+        id: 'Q0-2',
+        question: '5V 전원(Vs = 5V)에 순방향 전압 Vf = 2V인 빨강 LED를 15mA(0.015A)로 안전하게 켜려고 합니다. 가장 적절한 직렬 보호 저항값은?',
+        options: ['10 Ω', '50 Ω', '200 Ω (표준 220 Ω)', '10,000 Ω (10 kΩ)'],
+        correctIndex: 2,
+        explanation:
+          'R = (Vs - Vf) / I = (5 - 2) / 0.015 = 3 / 0.015 = 200Ω입니다. 실제 부품에서는 가장 가까운 표준 저항인 220Ω을 사용합니다.',
+      },
+      {
+        id: 'Q0-3',
+        question: '회로에 걸리는 전압(V)이 같을 때, 보호 저항(R)을 0Ω(직결)으로 만들면 전류(I)는 어떻게 변하나요?',
+        options: [
+          '전류가 0mA가 되어 아무 일도 일어나지 않는다.',
+          '전류가 급격히 커져 LED와 보드 GPIO 핀이 과전류로 손상된다.',
+          'LED가 두 배 더 오래 수명을 유지한다.',
+          '전압이 자동으로 0V로 내려간다.',
+        ],
+        correctIndex: 1,
+        explanation:
+          'I = V / R에서 분모인 R이 0에 가까워지면 전류가 폭발적으로 증가(단락/과전류)하여 LED가 타버리고 MCU 핀(최대 40mA)까지 파손될 수 있습니다.',
+      },
+      {
+        id: 'Q0-4',
+        question: 'ESP32의 3.3V 출력 핀에 파랑 LED(Vf = 3.2V)와 220Ω 저항을 연결했을 때 흐르는 전류는 약 얼마인가요? (빨강 LED Vf=2.0V와 비교해보세요)',
+        options: [
+          '약 0.45 mA (전압 여유가 0.1V뿐이라 매우 어둡거나 거의 안 켜짐)',
+          '약 15 mA (아주 밝음)',
+          '약 100 mA (과전류)',
+          '약 500 mA (즉시 폭발)',
+        ],
+        correctIndex: 0,
+        explanation:
+          'I = (3.3 - 3.2) / 220 ≈ 0.00045A = 0.45mA입니다. 파랑·흰색 LED는 Vf가 약 3.0~3.3V로 높기 때문에 3.3V 보드에서는 100Ω 이하의 작은 저항을 쓰거나 5V 전원을 활용해야 밝게 켜집니다.',
+      },
+      {
+        id: 'Q0-5',
+        question: '직류 회로에서 전압 5V, 전류 0.2A(200mA)가 흐를 때 회로 전체가 소비하는 전력(P)은?',
+        options: ['0.04 W', '1.0 W', '2.5 W', '25 W'],
+        correctIndex: 1,
+        explanation:
+          '소비 전력 P = V × I = 5V × 0.2A = 1.0W(1,000mW)입니다. 저항이나 레귤레이터를 고를 때는 항상 정격 전력(예: 0.25W)을 넘지 않는지 확인해야 합니다.',
+      },
+    ],
+  },
   {
     id: 'esp32',
     order: 1,
+    dayLabel: 'Day 09',
+    phaseLabel: 'Phase 2 · ESP32/모터',
     title: 'ESP32 아키텍처 & GPIO 핀 제약',
-    shortTitle: '1. ESP32 핀맵',
+    shortTitle: 'D09 · ESP32 핀맵',
     subtitle: '안전 핀 · 입력 전용(GPI) · 스트래핑 핀 · SPI Flash 금지 핀',
     badge: '하드웨어 기초',
-    milestoneTag: 'M1 인터랙티브 보드',
+    milestoneTag: 'Day 09 인터랙티브 3D 보드',
+    failFirstHook:
+      'ESP32 보드 옆에 핀 번호가 많다고 아무 구멍이나 골라 GPIO 6~11에 센서를 꽂으면 보드가 즉시 먹통이 되고, GPIO 12에 풀업 저항을 달면 부팅조차 되지 않습니다.',
+    beginnerAnalogy:
+      'ESP32의 30개 핀은 똑같은 아파트 현관문 같지만, 어떤 문은 "내부 창고 전용(GPIO 6~11)", 어떤 문은 "출근 모드 체크 스위치(Strapping)", 어떤 문은 "초인종 전용(입력만 가능 34~39)"이라 용도를 알고 꽂아야 합니다.',
     overviewSummary:
-      'ESP32(ESP-WROOM-32 기준)는 강력한 듀얼 코어 MCU지만, 부팅 스트래핑과 내장 SPI 플래시, 출력 드라이버 유무, Wi-Fi-ADC2 리소스 공유 같은 물리적 제약이 존재합니다. 3D 보드의 각 핀을 탭해 안전 등급과 전기적 한계를 확인하세요.',
+      'ESP32(ESP-WROOM-32 기준)는 강력한 듀얼 코어 MCU지만, 부팅 스트래핑과 내장 SPI 플래시, 출력 드라이버 유무, Wi-Fi–ADC2 리소스 공유 같은 물리적 제약이 존재합니다. 3D 보드의 각 핀을 탭해 안전 등급과 전기적 한계를 확인하세요.',
+    guidedMissions: [
+      {
+        id: 'esp32-prohibited',
+        title: '3D 보드에서 핀(또는 GPIO 6~11 금지핀 필터) 직접 탭해 스펙 확인하기',
+        hint: '3D 화면의 금색 핀을 클릭하거나 핀·배선 탭에서 "사용 금지" 필터를 눌러보세요.',
+      },
+      {
+        id: 'esp32-wifi',
+        title: '시뮬레이터에서 Wi-Fi 활성화 켜고 ADC2 빨간 충돌 확인하기',
+        hint: '직접 실습 탭에서 "내장 Wi-Fi 통신 활성화" 스위치를 ON으로 바꾸세요.',
+      },
+      {
+        id: 'esp32-explode',
+        title: '3D 보드 "분해 보기"로 내부 RF 쉴드와 헤더 분리하기',
+        hint: '3D 화면 우측 상단 "분해 보기" 버튼을 누르거나 분해 슬라이더를 올리세요.',
+      },
+    ],
     highlights: [
       {
         title: '전류 한계 & 3.3V 로직 레벨',
@@ -78,6 +296,18 @@ void loop() {
   ledcWrite(SAFE_PWM_PIN, duty);
   delay(20);
 }`,
+    codeChallenge: {
+      prompt: 'Wi-Fi로 조종하는 로봇에서 배터리 전압(아날로그)을 읽으려는데 Wi-Fi를 켜자마자 값이 안 읽힙니다. 안전하게 핀을 교체해 보세요!',
+      buggyLine: '#define BATTERY_ADC_PIN 25 // ADC2 핀: Wi-Fi와 충돌!',
+      options: [
+        '#define BATTERY_ADC_PIN 34 // ADC1 핀: Wi-Fi 중에도 안정',
+        '#define BATTERY_ADC_PIN 6  // SPI Flash 핀',
+        '#define BATTERY_ADC_PIN 12 // Strapping + ADC2 핀',
+      ],
+      correctIndex: 0,
+      explanation:
+        'GPIO 25는 ADC2 블록이라 Wi-Fi가 켜지면 아날로그 읽기가 중단됩니다. GPIO 32, 33, 34, 35, 36, 39 중 하나(ADC1)로 옮겨야 합니다.',
+    },
     quizzes: [
       {
         id: 'Q1-1',
@@ -143,13 +373,36 @@ void loop() {
   {
     id: 'kinematics',
     order: 2,
+    dayLabel: 'Day 21~22',
+    phaseLabel: 'Phase 3 · 수학/기구학/CAD',
     title: '2축 평면 로봇 팔 기구학 (FK / IK)',
-    shortTitle: '2. 2축 로봇 팔',
+    shortTitle: 'D21 · 2축 로봇 팔',
     subtitle: '순기구학 · 역기구학 · 작업공간 환형 경계 · 특이점',
     badge: '기구학 모델',
-    milestoneTag: 'M1 프리뷰 리그 (M3 확장)',
+    milestoneTag: 'Day 21~22 3D 기구학 랩',
+    failFirstHook:
+      '팔 길이(L1+L2)보다 먼 목표 좌표를 입력했는데 |D| > 1 예외처리를 빼먹으면 sqrt(음수) 때문에 NaN이 발생해 서보가 한계 각도까지 꺾이며 기어가 부서집니다.',
+    beginnerAnalogy:
+      '순기구학(FK)은 "어깨 30도, 팔꿈치 45도 구부렸을 때 손끝이 어디 있지?"를 구하는 문제이고, 역기구학(IK)은 반대로 "책상 위 물컵(x, y)을 잡으려면 어깨와 팔꿈치를 몇 도로 구부려야 하지?"를 거꾸로 푸는 문제입니다.',
     overviewSummary:
       '2자유도 평면 회전 관절(Planar 2R) 로봇 팔은 관절 각도(θ₁, θ₂)에서 끝점 좌표(x, y)를 구하는 순기구학(FK)과, 목표 좌표에서 각도를 역산하는 역기구학(IK)의 핵심 원리를 보여줍니다.',
+    guidedMissions: [
+      {
+        id: 'kin-theta',
+        title: '관절 각도(θ₁, θ₂) 슬라이더를 움직여 끝점 좌표 (x, y) 변화 확인하기',
+        hint: '직접 실습 탭에서 θ₁ 또는 θ₂ 슬라이더를 드래그해 3D 팔을 움직여 보세요.',
+      },
+      {
+        id: 'kin-link',
+        title: '링크 길이를 L₁ ≠ L₂로 바꿔 작업공간 중앙의 주황색 비도달 구멍 보기',
+        hint: 'L₁과 L₂ 길이를 다르게 설정하면 바닥 원에 내부 도넛 홀(|L₁−L₂|)이 나타납니다.',
+      },
+      {
+        id: 'kin-code',
+        title: '코드 랩에서 역기구학 도달 불가 예외처리 버그 수정하기',
+        hint: '코드 랩 탭 하단의 미니 코드 디버깅 챌린지를 풀어보세요.',
+      },
+    ],
     highlights: [
       {
         title: 'Elbow-up (Lefty) vs Elbow-down (Righty)',
@@ -240,6 +493,18 @@ export function solve2LinkIK(
     singularity: Math.abs(Math.abs(D) - 1) < 1e-3,
   };
 }`,
+    codeChallenge: {
+      prompt: '목표 좌표가 작업공간 밖일 때 NaN 크래시를 막으려면 D 값의 어떤 조건을 먼저 검사해야 할까요?',
+      buggyLine: 'if (D === 0) { return { reachable: false, ... }; } // 잘못된 조건!',
+      options: [
+        'if (Math.abs(D) > 1) { return { reachable: false, ... }; }',
+        'if (D < 0) { return { reachable: false, ... }; }',
+        'if (L1 === L2) { return { reachable: false, ... }; }',
+      ],
+      correctIndex: 0,
+      explanation:
+        'D = cos(θ₂)이므로 실수 각도가 존재하려면 반드시 -1 ≤ D ≤ 1 이어야 합니다. 따라서 Math.abs(D) > 1이면 도달 불가(Unreachable)로 즉시 반환해야 안전합니다.',
+    },
     quizzes: [
       {
         id: 'Q2-1',
@@ -311,13 +576,36 @@ export function solve2LinkIK(
   {
     id: 'ultrasonic',
     order: 3,
+    dayLabel: 'Day 26',
+    phaseLabel: 'Phase 4 · 센서/PID/필터',
     title: 'HC-SR04 초음파 ToF 거리 계측',
-    shortTitle: '3. 초음파 센서',
+    shortTitle: 'D26 · 초음파 센서',
     subtitle: '40kHz 펄스 시퀀스 · 왕복 시간 거리식 · 3.3V 분압 보호',
     badge: '센서 인터페이스',
-    milestoneTag: 'M1 프리뷰 리그 (M3 확장)',
+    milestoneTag: 'Day 26 초음파 3D 레이더',
+    failFirstHook:
+      '5V로 동작하는 HC-SR04의 ECHO 선을 저항 분배기 없이 3.3V ESP32 핀에 바로 꽂으면 핀이 손상될 수 있고, 측정 주기를 60ms보다 짧게 잡으면 메아리(잔향) 때문에 거리가 미친 듯이 튑니다.',
+    beginnerAnalogy:
+      '절벽 앞에서 "야호!" 외치고 메아리가 되돌아올 때까지 스톱워치를 재는 원리입니다. 소리가 벽까지 갔다가 돌아온 왕복 시간이므로 거리를 구할 때는 꼭 절반(÷2)을 나눠야 합니다.',
     overviewSummary:
       'HC-SR04는 40kHz 초음파 버스트 8주기를 송출하고 반사파의 왕복 시간(ToF)을 측정해 2cm~400cm 거리를 계산합니다. 5V 구동 센서이므로 ESP32의 3.3V GPIO 보호를 위한 전압 분배가 핵심입니다.',
+    guidedMissions: [
+      {
+        id: 'us-dist',
+        title: '장애물 거리 슬라이더로 ECHO 펄스(μs) 변화 관찰하기',
+        hint: '직접 실습 탭에서 장애물 거리를 2~350cm 사이로 움직여 보세요.',
+      },
+      {
+        id: 'us-timeout',
+        title: '거리를 395cm 이상으로 올려 38ms 타임아웃 상태 만들기',
+        hint: '최대 측정 범위(400cm) 근처에서 반사파가 없을 때 타임아웃 배지를 확인하세요.',
+      },
+      {
+        id: 'us-sweep',
+        title: '서보 스캔 각도를 돌려 15° 초음파 빔 회전시키기',
+        hint: '서보 스캔 각도 슬라이더(-60°~+60°)를 좌우로 돌려 레이더처럼 탐지하세요.',
+      },
+    ],
     highlights: [
       {
         title: '계측 시퀀스: 10μs TRIG → 60ms 주기',
@@ -396,6 +684,18 @@ void loop() {
   Serial.printf("Echo: %ld us | Distance: %.1f cm\\n", durationUs, distanceCm);
   delay(65); // 잔향 간섭 방지를 위해 최소 60ms 이상 주기 유지
 }`,
+    codeChallenge: {
+      prompt: '초음파 거리 값이 계속 잔향 때문에 요동치고 있습니다. loop() 마지막의 대기 시간을 데이터시트 권장 주기에 맞게 고쳐보세요!',
+      buggyLine: 'delay(5); // 5ms마다 발사하면 이전 메아리와 충돌!',
+      options: [
+        'delay(65); // 최소 60ms 이상 측정 주기 유지',
+        'delayMicroseconds(10); // 더 빠르게 발사',
+        'delay(0); // 대기 없이 즉시 발사',
+      ],
+      correctIndex: 0,
+      explanation:
+        '이전 초음파 펄스의 벽 반사 잔향이 사라진 뒤 다음 측정을 시작하려면 최소 60ms 이상(예: 65ms) 간격을 두어야 합니다.',
+    },
     quizzes: [
       {
         id: 'Q3-1',
@@ -466,13 +766,36 @@ void loop() {
   {
     id: 'pid',
     order: 4,
+    dayLabel: 'Day 30~31',
+    phaseLabel: 'Phase 4 · 센서/PID/필터',
     title: '이산 시간 디지털 PID 제어 알고리즘',
-    shortTitle: '4. 디지털 PID',
+    shortTitle: 'D30 · 디지털 PID',
     subtitle: '위치형/증분형 이산화 · 안티 와인드업 · 미분항 LPF 필터',
     badge: '폐루프 제어',
-    milestoneTag: 'M1 프리뷰 리그 (M3 확장)',
+    milestoneTag: 'Day 30~31 3D PID 서보 벤치',
+    failFirstHook:
+      '단순 비례(Kp) 게인만 너무 높이 올리면 모터가 목표 각도를 뚫고 지나쳐 좌우로 미친 듯이 흔들리고, 적분(I) 클램핑이 없으면 손으로 막았다 놓을 때 반대편으로 폭주합니다.',
+    beginnerAnalogy:
+      '자동차 주차로 비유하면: P는 목표까지 밟는 액셀 세기(스프링), I는 살짝 모자란 거리를 끝까지 밀어주는 끈기, D는 주차선 앞에서 스르륵 브레이크를 밟아 들이받지 않게 막는 댐퍼입니다.',
     overviewSummary:
       '마이크로컨트롤러는 샘플링 주기 Δt마다 오차 e[k]를 계산해 제어 입력을 갱신합니다. Kp·Ki·Kd의 물리적 역할뿐 아니라 포화 시 적분 누적(와인드업)과 미분 노이즈 증폭을 막는 실무 기법이 중요합니다.',
+    guidedMissions: [
+      {
+        id: 'pid-setpoint',
+        title: '목표 각도(Setpoint)를 바꿔 3D 로터가 주황 목표선을 쫓아가는 모습 보기',
+        hint: '직접 실습 탭에서 목표 각도 슬라이더를 -90° 또는 +110°로 움직여 보세요.',
+      },
+      {
+        id: 'pid-kp',
+        title: '비례 게인(Kp)을 9.0 이상으로 높여 오버슈트·진동 체험하기',
+        hint: 'Kp를 높이고 Kd를 낮추면 목표선 주변을 넘나들며 출렁이는 현상이 보입니다.',
+      },
+      {
+        id: 'pid-kd',
+        title: '미분 게인(Kd)을 올려 브레이크(감쇠)로 진동 잡기',
+        hint: 'Kd를 0.8 이상으로 올린 뒤 목표 각도를 바꾸면 매끄럽게 멈추는 것을 확인하세요.',
+      },
+    ],
     highlights: [
       {
         title: 'P · I · D 세 항의 물리적 역할',
@@ -555,6 +878,18 @@ void loop() {
     return Math.max(-uMax, Math.min(uMax, pTerm + iTerm + dTerm));
   }
 }`,
+    codeChallenge: {
+      prompt: '로봇 팔이 장애물에 걸려 멈춘 동안 적분항(eInt)이 끝없이 커지는 와인드업(Windup)을 막으려면 어떻게 업데이트해야 할까요?',
+      buggyLine: 'this.eInt = this.eInt + error / dt; // dt를 나누고 클램핑도 없음!',
+      options: [
+        'this.eInt = Math.max(-uMax, Math.min(uMax, this.eInt + error * dt));',
+        'this.eInt = error * dt; // 이전 적분을 매번 버림',
+        'this.eInt = this.eInt + (error - this.prevError) * dt;',
+      ],
+      correctIndex: 0,
+      explanation:
+        '적분은 오차 면적(error * dt)을 누적해야 하며, 구동기 포화 시 폭주를 막기 위해 반드시 [-uMax, +uMax] 범위로 클램핑(Anti-Windup)해야 합니다.',
+    },
     quizzes: [
       {
         id: 'Q4-1',
@@ -628,4 +963,21 @@ void loop() {
       },
     ],
   },
+];
+
+export const LAB_MODULES: LabModule[] = [
+  BASE_LAB_MODULES[0],
+  ...PHASE1_EXTRA_MODULES,
+  PHASE2_MODULES[0], // day08_board
+  BASE_LAB_MODULES[1], // esp32 (Day 09)
+  ...PHASE2_MODULES.slice(1), // day10 .. day16
+  ...PHASE3_MODULES.slice(0, 4), // day17 .. day20
+  BASE_LAB_MODULES[2], // kinematics (D21~D22)
+  ...PHASE3_MODULES.slice(4), // day23 .. day25
+  BASE_LAB_MODULES[3], // ultrasonic (D26)
+  ...PHASE4_MODULES.slice(0, 3), // day27 .. day29
+  BASE_LAB_MODULES[4], // pid (D30)
+  ...PHASE4_MODULES.slice(3), // day31 .. day34
+  ...PHASE5_MODULES, // day35 .. day42
+  ...PHASE6_MODULES, // day43 .. day45
 ];

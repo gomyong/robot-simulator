@@ -1,4 +1,4 @@
-import { CheckCircle2, HelpCircle, RotateCcw, XCircle } from 'lucide-react';
+import { CheckCircle2, RotateCcw, XCircle } from 'lucide-react';
 import { LabModule } from '../../types/lab';
 
 interface QuizTabProps {
@@ -14,76 +14,72 @@ export function QuizTab({
   onAnswer,
   onResetModuleQuiz,
 }: QuizTabProps) {
-  const answeredCount = module.quizzes.filter((q) => answers[q.id] !== undefined).length;
+  const answeredCount = module.quizzes.filter(
+    (q) => answers[q.id] !== undefined,
+  ).length;
   const correctCount = module.quizzes.filter(
     (q) => answers[q.id] === q.correctIndex,
   ).length;
 
   return (
-    <div className="space-y-4">
-      {/* Score Summary Bar */}
-      <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 p-3.5">
-        <div className="flex items-center gap-2.5">
-          <HelpCircle className="h-4 w-4 text-sky-400" />
-          <div>
-            <div className="text-xs font-bold text-slate-100">
-              {module.shortTitle} 핵심 검증 퀴즈
-            </div>
-            <div className="mt-0.5 font-mono text-[11px] text-slate-400">
-              진행 {answeredCount}/{module.quizzes.length} · 정답 {correctCount}문항
-            </div>
+    <div className="space-y-5">
+      {/* Clean Header Row */}
+      <div className="flex items-center justify-between gap-2 border-b border-[#E6E8EC] pb-3.5">
+        <div>
+          <div className="text-xs font-semibold text-[#0A2540]">
+            {module.shortTitle} 검증 퀴즈
+          </div>
+          <div className="mt-0.5 font-mono text-[11px] text-[#697386]">
+            진행 {answeredCount}/{module.quizzes.length} · 정답 {correctCount} (+20 EXP)
           </div>
         </div>
         {answeredCount > 0 && (
           <button
             type="button"
             onClick={() => onResetModuleQuiz(module.quizzes.map((q) => q.id))}
-            className="flex min-h-[36px] items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2.5 text-xs font-medium text-slate-300 transition hover:border-slate-600 hover:text-white"
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-[#425466] transition hover:bg-[#F1F3F6] hover:text-[#0A2540]"
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            <span>다시 풀기</span>
+            <span>초기화</span>
           </button>
         )}
       </div>
 
-      {/* Question Cards */}
-      <div className="space-y-4">
+      {/* Hairline-Separated Questions (Zero Outer Card Soup) */}
+      <div className="divide-y divide-[#E6E8EC]">
         {module.quizzes.map((q, qIdx) => {
           const picked = answers[q.id];
           const isAnswered = picked !== undefined;
           const isCorrect = picked === q.correctIndex;
 
           return (
-            <div
-              key={q.id}
-              className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
-            >
-              <div className="flex items-start gap-2">
-                <span className="mt-0.5 rounded-md border border-sky-500/35 bg-sky-500/15 px-1.5 py-0.5 font-mono text-[11px] font-bold text-sky-300">
+            <div key={q.id} className="py-5 first:pt-1">
+              <div className="flex items-start gap-2.5">
+                <span className="mt-0.5 font-mono text-[11px] font-semibold text-[#635BFF]">
                   Q{qIdx + 1}
                 </span>
-                <p className="text-xs font-semibold leading-relaxed text-slate-100">
+                <p className="text-xs font-semibold leading-relaxed text-[#0A2540]">
                   {q.question}
                 </p>
               </div>
 
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 space-y-1.5">
                 {q.options.map((opt, optIdx) => {
                   const chosen = picked === optIdx;
                   const rightOption = optIdx === q.correctIndex;
 
                   let btnStyle =
-                    'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700 hover:bg-slate-900';
+                    'border-[#E6E8EC] bg-white text-[#425466] hover:bg-[#F7F8FA] hover:text-[#0A2540]';
                   if (isAnswered) {
                     if (rightOption) {
                       btnStyle =
-                        'border-emerald-500/60 bg-emerald-500/15 text-emerald-200';
+                        'border-emerald-300 bg-emerald-50/60 text-emerald-900';
                     } else if (chosen && !rightOption) {
                       btnStyle =
-                        'border-rose-500/60 bg-rose-500/15 text-rose-200';
+                        'border-rose-300 bg-rose-50/60 text-rose-900';
                     } else {
                       btnStyle =
-                        'border-slate-800/60 bg-slate-950/30 text-slate-500';
+                        'border-[#ECEEF2] bg-[#F7F8FA]/50 text-[#98A2B3]';
                     }
                   }
 
@@ -93,19 +89,19 @@ export function QuizTab({
                       type="button"
                       disabled={isAnswered}
                       onClick={() => onAnswer(q.id, optIdx)}
-                      className={`flex min-h-[44px] w-full items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-xs transition ${btnStyle}`}
+                      className={`flex min-h-[40px] w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-xs font-medium transition ${btnStyle}`}
                     >
                       <span className="leading-relaxed">
-                        <span className="mr-2 font-mono font-bold text-slate-400">
+                        <span className="mr-2 font-mono text-[11px] text-[#98A2B3]">
                           {optIdx + 1}.
                         </span>
                         {opt}
                       </span>
                       {isAnswered && rightOption && (
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
                       )}
                       {isAnswered && chosen && !rightOption && (
-                        <XCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                        <XCircle className="h-4 w-4 shrink-0 text-rose-600" />
                       )}
                     </button>
                   );
@@ -113,18 +109,20 @@ export function QuizTab({
               </div>
 
               {isAnswered && (
-                <div
-                  className={`mt-3 rounded-lg border p-3 text-xs leading-relaxed ${
+                <p
+                  className={`mt-3 border-l-2 pl-3 text-xs leading-relaxed ${
                     isCorrect
-                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                      : 'border-amber-500/30 bg-amber-500/10 text-amber-200'
+                      ? 'border-emerald-500 text-[#425466]'
+                      : 'border-amber-500 text-[#425466]'
                   }`}
                 >
-                  <strong className="mr-1.5">
-                    {isCorrect ? '정답입니다!' : `오답 (정답: ${q.correctIndex + 1}번)`}
+                  <strong className="mr-1.5 text-[#0A2540]">
+                    {isCorrect
+                      ? '정답 (+20 EXP)'
+                      : `오답 (정답: ${q.correctIndex + 1}번 · 복습 등록)`}
                   </strong>
                   {q.explanation}
-                </div>
+                </p>
               )}
             </div>
           );

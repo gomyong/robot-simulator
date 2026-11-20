@@ -4,17 +4,23 @@ export default {
   theme: {
     extend: {
       colors: {
-        lab: {
-          bg: '#0B0F17',
-          surface: '#111827',
-          elevated: '#161F30',
-          border: '#1E293B',
-          borderStrong: '#334155',
-          cyan: '#38BDF8',
-          emerald: '#10B981',
-          amber: '#F59E0B',
-          rose: '#EF4444',
-          violet: '#8B5CF6',
+        ink: {
+          DEFAULT: '#0A2540',
+          secondary: '#425466',
+          muted: '#697386',
+        },
+        surface: {
+          base: '#FFFFFF',
+          recessed: '#F7F8FA',
+          subtle: '#F1F3F6',
+        },
+        line: {
+          DEFAULT: '#E6E8EC',
+          strong: '#D0D5DD',
+        },
+        accent: {
+          DEFAULT: '#635BFF',
+          hover: '#5249F5',
         },
       },
       fontFamily: {

@@ -7,11 +7,25 @@ interface PlanarArm3DProps {
   theta2Deg: number;
   L1: number;
   L2: number;
+  ikMode?: boolean;
+  targetX?: number;
+  targetY?: number;
 }
 
-export function PlanarArm3D({ theta1Deg, theta2Deg, L1, L2 }: PlanarArm3DProps) {
+export function PlanarArm3D({
+  theta1Deg,
+  theta2Deg,
+  L1,
+  L2,
+  ikMode = false,
+  targetX = 2.0,
+  targetY = 1.2,
+}: PlanarArm3DProps) {
   const t1 = (theta1Deg * Math.PI) / 180;
   const t2 = (theta2Deg * Math.PI) / 180;
+
+  const ikD = (targetX * targetX + targetY * targetY - L1 * L1 - L2 * L2) / (2 * L1 * L2);
+  const ikReachable = Math.abs(ikD) <= 1;
 
   const fk = useMemo(() => {
     const x = L1 * Math.cos(t1) + L2 * Math.cos(t1 + t2);
@@ -46,6 +60,31 @@ export function PlanarArm3D({ theta1Deg, theta2Deg, L1, L2 }: PlanarArm3DProps) 
           </mesh>
         )}
       </group>
+
+      {ikMode && (
+        <group position={[targetX, 0.35, -targetY]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.14, 18, 18]} />
+            <meshStandardMaterial
+              color={ikReachable ? '#635BFF' : '#EF4444'}
+              emissive={ikReachable ? '#635BFF' : '#EF4444'}
+              emissiveIntensity={0.45}
+            />
+          </mesh>
+          <Html position={[0, 0.32, 0]} center>
+            <div
+              className={`pointer-events-none whitespace-nowrap rounded border px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
+                ikReachable
+                  ? 'border-[#C7D2FE] bg-white/95 text-[#4338CA]'
+                  : 'border-rose-300 bg-rose-50/95 text-rose-700'
+              }`}
+            >
+              IK 목표 ({targetX.toFixed(1)}, {targetY.toFixed(1)})
+              {!ikReachable && ' · |D|>1 도달불가!'}
+            </div>
+          </Html>
+        </group>
+      )}
 
       {/* Base Pedestal & Servo 1 */}
       <mesh position={[0, 0.14, 0]} castShadow receiveShadow>
@@ -90,8 +129,8 @@ export function PlanarArm3D({ theta1Deg, theta2Deg, L1, L2 }: PlanarArm3DProps) 
                 roughness={0.25}
               />
             </mesh>
-            <Html position={[0, 0.35, 0]} center distanceFactor={8}>
-              <div className="pointer-events-none whitespace-nowrap rounded-md border border-sky-400/50 bg-slate-950/90 px-2 py-0.5 font-mono text-[11px] text-sky-200 shadow">
+            <Html position={[0, 0.35, 0]} center>
+              <div className="pointer-events-none whitespace-nowrap rounded-md border border-[#E6E8EC] bg-white/95 px-2 py-0.5 font-mono text-[11px] font-medium text-[#0A2540]">
                 ({fk.x.toFixed(2)}, {fk.y.toFixed(2)})
               </div>
             </Html>

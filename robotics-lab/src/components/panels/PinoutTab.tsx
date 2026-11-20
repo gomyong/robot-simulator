@@ -1,4 +1,3 @@
-import { AlertOctagon, Cpu, Wifi } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ESP32_PINS, PIN_CATEGORY_META } from '../../data/esp32Pins';
 import { LabModule, PinSafetyCategory } from '../../types/lab';
@@ -24,44 +23,41 @@ export function PinoutTab({
   }, [filter]);
 
   const selectedPin = useMemo(
-    () => ESP32_PINS.find((p) => p.id === selectedPinId) ?? ESP32_PINS[5], // default GPIO 32
+    () => ESP32_PINS.find((p) => p.id === selectedPinId) ?? ESP32_PINS[5],
     [selectedPinId],
   );
 
-  // For non-ESP32 modules, show module-specific wiring notes + link to ESP32 full map
+  // Non-ESP32 modules: clean hairline wiring specification table
   if (module.id !== 'esp32') {
     return (
-      <div className="space-y-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-sky-300">
-            <Cpu className="h-4 w-4" />
-            <span>{module.shortTitle} ESP32 권장 배선 매핑</span>
+      <div className="space-y-5">
+        <header>
+          <div className="text-xs font-semibold text-[#0A2540]">
+            {module.shortTitle} 안전 배선 가이드
           </div>
-          <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
-            하드웨어 보호와 부팅 안정성을 고려해 ESP-WROOM-32 기준 안전 핀에 배선한 가이드입니다.
+          <p className="mt-1 text-xs text-[#697386]">
+            전원 손상과 부팅 충돌을 피하기 위한 실전 배선 기준입니다.
           </p>
-        </div>
+        </header>
 
-        <div className="space-y-2.5">
+        <div className="divide-y divide-[#ECEEF2] border-y border-[#E6E8EC]">
           {module.wiringNotes.map((wire) => (
-            <div
-              key={wire.signal}
-              className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5"
-            >
+            <div key={wire.signal} className="py-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-bold text-slate-100">{wire.signal}</span>
-                <span className="rounded-md border border-sky-500/35 bg-sky-500/15 px-2 py-0.5 font-mono text-[11px] font-semibold text-sky-300">
+                <span className="text-xs font-semibold text-[#0A2540]">
+                  {wire.signal}
+                </span>
+                <span className="rounded bg-[#F1F3F6] px-2 py-0.5 font-mono text-[11px] font-medium text-[#0A2540]">
                   {wire.pin}
                 </span>
               </div>
-              <p className="mt-1.5 text-xs leading-relaxed text-slate-300">
+              <p className="mt-1.5 text-xs leading-relaxed text-[#425466]">
                 {wire.detail}
               </p>
               {wire.warning && (
-                <div className="mt-2 flex items-start gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 p-2 text-[11px] text-rose-200">
-                  <AlertOctagon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-400" />
-                  <span>{wire.warning}</span>
-                </div>
+                <p className="mt-2 border-l-2 border-rose-500 pl-2.5 text-[11px] font-medium text-rose-700">
+                  {wire.warning}
+                </p>
               )}
             </div>
           ))}
@@ -74,63 +70,58 @@ export function PinoutTab({
   const adc2Conflict = wifiActive && selectedPin.adcChannel === 'ADC2';
 
   return (
-    <div className="space-y-4">
-      {/* Selected Pin Detail Card */}
-      <div className="rounded-xl border border-slate-700/80 bg-slate-900/90 p-4">
+    <div className="space-y-6">
+      {/* Selected Pin Detail (Directly on White Surface + Subtle Tinted Block) */}
+      <section className="rounded-xl bg-[#F7F8FA] p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className={`h-2.5 w-2.5 rounded-full ${meta.dotClass}`} />
-            <span className="font-mono text-base font-bold text-slate-100">
+            <span className={`h-2 w-2 rounded-full ${meta.dotClass}`} />
+            <span className="font-mono text-sm font-bold text-[#0A2540]">
               {selectedPin.label}
             </span>
           </div>
           <span
-            className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${meta.badgeClass}`}
+            className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${meta.badgeClass}`}
           >
             {selectedPin.categoryLabel}
           </span>
         </div>
 
-        <p className="mt-2 text-xs leading-relaxed text-slate-300">
+        <p className="mt-2 text-xs leading-relaxed text-[#425466]">
           {selectedPin.summary}
         </p>
 
-        {/* Capability Pills */}
         <div className="mt-3 flex flex-wrap gap-1.5">
           {selectedPin.roles.map((role) => (
             <span
               key={role}
-              className="rounded-md border border-slate-700 bg-slate-800/80 px-2 py-0.5 font-mono text-[10px] text-slate-300"
+              className="rounded bg-white px-2 py-0.5 font-mono text-[10px] font-medium text-[#425466]"
             >
               {role}
             </span>
           ))}
-          <span className="rounded-md border border-slate-700 bg-slate-800/80 px-2 py-0.5 font-mono text-[10px] text-slate-300">
+          <span className="rounded bg-white px-2 py-0.5 font-mono text-[10px] font-medium text-[#425466]">
             PWM: {selectedPin.pwmCapable ? '가능' : '불가'}
           </span>
-          <span className="rounded-md border border-slate-700 bg-slate-800/80 px-2 py-0.5 font-mono text-[10px] text-slate-300">
-            내부 풀업/다운: {selectedPin.internalPullResistor ? '있음' : '없음'}
+          <span className="rounded bg-white px-2 py-0.5 font-mono text-[10px] font-medium text-[#425466]">
+            풀업/다운: {selectedPin.internalPullResistor ? '있음' : '없음'}
           </span>
         </div>
 
         {adc2Conflict && (
-          <div className="mt-3 flex items-start gap-2 rounded-lg border border-rose-500/40 bg-rose-500/15 p-2.5 text-xs text-rose-200">
-            <Wifi className="mt-0.5 h-4 w-4 shrink-0 text-rose-400" />
-            <span>
-              <strong>Wi-Fi 활성화 충돌:</strong> 이 핀은 <code>ADC2</code> 블록에 속해 있어 현재 Wi-Fi 사용 중 아날로그 전압 읽기(analogRead)가 중단됩니다. ADC1 핀(32~39)을 사용하세요.
-            </span>
+          <div className="mt-3 border-l-2 border-rose-500 pl-3 text-xs text-rose-700">
+            <strong>Wi-Fi 충돌:</strong> <code>ADC2</code> 블록에 속해 있어 Wi-Fi 구동 중 analogRead가 중단됩니다. ADC1(32~39)을 사용하세요.
           </div>
         )}
 
         {selectedPin.caution && (
-          <div className="mt-2.5 flex items-start gap-2 rounded-lg border border-amber-500/35 bg-amber-500/10 p-2.5 text-xs text-amber-200">
-            <AlertOctagon className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-            <span>{selectedPin.caution}</span>
+          <div className="mt-2.5 border-l-2 border-amber-500 pl-3 text-xs text-amber-800">
+            {selectedPin.caution}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Category Filter Pills */}
+      {/* Minimal Filter Strip */}
       <div className="flex flex-wrap gap-1.5">
         {(
           [
@@ -138,7 +129,7 @@ export function PinoutTab({
             { id: 'safe', label: '안전 핀' },
             { id: 'input_only', label: '입력 전용' },
             { id: 'strapping', label: '스트래핑' },
-            { id: 'prohibited', label: '사용 금지(6~11)' },
+            { id: 'prohibited', label: '사용 금지' },
             { id: 'power', label: '전원' },
           ] as const
         ).map((item) => (
@@ -146,10 +137,10 @@ export function PinoutTab({
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id)}
-            className={`min-h-[34px] rounded-lg border px-2.5 text-[11px] font-medium transition ${
+            className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition ${
               filter === item.id
-                ? 'border-sky-400/60 bg-sky-500/20 text-sky-200'
-                : 'border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                ? 'bg-[#0A2540] text-white'
+                : 'bg-[#F7F8FA] text-[#425466] hover:bg-[#ECEEF2] hover:text-[#0A2540]'
             }`}
           >
             {item.label}
@@ -157,8 +148,8 @@ export function PinoutTab({
         ))}
       </div>
 
-      {/* Interactive Pin List (Bidirectionally Synced with 3D Board) */}
-      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+      {/* Clean Hairline Pin Directory */}
+      <div className="divide-y divide-[#ECEEF2] border-y border-[#E6E8EC]">
         {filteredPins.map((pin) => {
           const pinMeta = PIN_CATEGORY_META[pin.category];
           const isSelected = pin.id === selectedPin.id;
@@ -168,29 +159,25 @@ export function PinoutTab({
               key={pin.id}
               type="button"
               onClick={() => onSelectPin(pin.id)}
-              className={`flex min-h-[44px] items-center justify-between rounded-xl border px-3 py-2 text-left transition ${
-                isSelected
-                  ? 'border-sky-400 bg-sky-500/15'
-                  : 'border-slate-800/90 bg-slate-900/60 hover:border-slate-700'
+              className={`flex w-full items-center justify-between gap-2 px-2 py-2.5 text-left transition ${
+                isSelected ? 'bg-[#EEF2FF]' : 'hover:bg-[#F7F8FA]'
               }`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <span className={`h-2 w-2 rounded-full ${pinMeta.dotClass}`} />
-                <div>
-                  <div className="font-mono text-xs font-bold text-slate-100">
-                    {pin.label}
-                  </div>
-                  <div className="text-[10px] text-slate-400">
-                    {pin.roles[0]}
-                  </div>
-                </div>
+                <span className="font-mono text-xs font-semibold text-[#0A2540]">
+                  {pin.label}
+                </span>
+                <span className="text-[11px] text-[#697386]">
+                  {pin.roles[0]}
+                </span>
               </div>
               {isConflict ? (
-                <span className="rounded bg-rose-500/20 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-rose-300">
+                <span className="font-mono text-[10px] font-semibold text-rose-600">
                   Wi-Fi 충돌
                 </span>
               ) : pin.adcChannel ? (
-                <span className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
+                <span className="font-mono text-[10px] text-[#697386]">
                   {pin.adcChannel}
                 </span>
               ) : null}

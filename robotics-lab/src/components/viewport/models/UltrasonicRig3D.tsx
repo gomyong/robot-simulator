@@ -71,8 +71,8 @@ export function UltrasonicRig3D({ distanceCm, sweepDeg }: UltrasonicRig3DProps) 
               metalness={0.25}
             />
           </mesh>
-          <Html position={[0, 0.62, 0]} center distanceFactor={8}>
-            <div className="pointer-events-none whitespace-nowrap rounded-md border border-slate-700 bg-slate-950/90 px-2 py-0.5 font-mono text-[11px] text-slate-100 shadow">
+          <Html position={[0, 0.62, 0]} center>
+            <div className="pointer-events-none whitespace-nowrap rounded-md border border-[#E6E8EC] bg-white/95 px-2 py-0.5 font-mono text-[11px] font-medium text-[#0A2540]">
               {outOfRange ? '38ms 타임아웃' : `${clampedCm.toFixed(0)} cm · ${Math.round(clampedCm * 58)} μs`}
             </div>
           </Html>
