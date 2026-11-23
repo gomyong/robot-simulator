@@ -2,6 +2,7 @@ import { ArrowRight, CheckCircle2, Clock, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { PHASE_LIST } from '../../data/roadmap45';
 import { CurriculumDay, ModuleId } from '../../types/lab';
+import { GlossaryText } from '../GlossaryText';
 import { MascotSpeechBubble } from '../PixelMascot';
 
 interface DaySyllabusModalProps {
@@ -103,13 +104,13 @@ export function DaySyllabusModal({
               이걸 모르면 생기는 고장
             </div>
             <p className="mt-1 text-xs leading-relaxed text-[#425466]">
-              {day.failFirstHook}
+              <GlossaryText text={day.failFirstHook} />
             </p>
           </div>
 
           {/* 10-sec Analogy */}
           <MascotSpeechBubble mood="thinking" label="10초 일상 비유">
-            {day.beginnerAnalogy}
+            <GlossaryText text={day.beginnerAnalogy} />
           </MascotSpeechBubble>
 
           {/* Learning Goals */}
@@ -126,7 +127,9 @@ export function DaySyllabusModal({
                   <span className="mt-0.5 font-mono text-[11px] font-semibold text-[#635BFF]">
                     0{idx + 1}
                   </span>
-                  <span>{goal}</span>
+                  <span>
+                    <GlossaryText text={goal} />
+                  </span>
                 </li>
               ))}
             </ul>

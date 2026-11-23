@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { GlossaryProvider } from './components/GlossaryText';
 import { InspectorPanel } from './components/panels/InspectorPanel';
 import { LabHeader } from './components/panels/LabHeader';
+import { Phase0WarmupModal } from './components/roadmap/Phase0WarmupModal';
 import { RoadmapHomeView } from './components/roadmap/RoadmapHomeView';
 import { LabViewport } from './components/viewport/LabViewport';
 import { LAB_MODULES } from './data/curriculum';
@@ -34,6 +36,9 @@ function loadInitialProgress(): LearningProgress {
           parsed.quizAnswers && typeof parsed.quizAnswers === 'object'
             ? parsed.quizAnswers
             : {},
+        warmupCompletedIds: Array.isArray(parsed.warmupCompletedIds)
+          ? parsed.warmupCompletedIds
+          : [],
       };
     }
 
@@ -45,6 +50,7 @@ function loadInitialProgress(): LearningProgress {
       quizAnswers: legacyQuiz
         ? (JSON.parse(legacyQuiz) as Record<string, number>)
         : {},
+      warmupCompletedIds: [],
     };
   } catch {
     return {
@@ -52,6 +58,7 @@ function loadInitialProgress(): LearningProgress {
       completedMissions: [],
       solvedCodeChallenges: [],
       quizAnswers: {},
+      warmupCompletedIds: [],
     };
   }
 }
@@ -62,6 +69,11 @@ export function App() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [selectedPinId, setSelectedPinId] = useState<string | null>('GPIO32');
   const [sketchRunning, setSketchRunning] = useState(false);
+  const [glossaryModal, setGlossaryModal] = useState<{
+    open: boolean;
+    tab: 'warmup' | 'glossary';
+    targetId?: string;
+  }>({ open: false, tab: 'warmup' });
   const [preview, setPreview] = useState<LabPreviewState>({
     exploded: 0,
     wifiActive: false,
@@ -271,14 +283,33 @@ export function App() {
       progress.completedMissions.length * 10 +
       progress.solvedCodeChallenges.length * 15 +
       totalCorrect * 20 +
-      progress.completedDays.length * 50
+      progress.completedDays.length * 50 +
+      progress.warmupCompletedIds.length * 5
     );
   }, [
     progress.completedMissions.length,
     progress.solvedCodeChallenges.length,
     totalCorrect,
     progress.completedDays.length,
+    progress.warmupCompletedIds.length,
   ]);
+
+  const handleOpenGlossary = useCallback(
+    (tab: 'warmup' | 'glossary', targetId?: string) => {
+      setGlossaryModal({ open: true, tab, targetId });
+    },
+    [],
+  );
+
+  const handleCompleteWarmupTerm = useCallback((termId: string) => {
+    setProgress((prev) => {
+      if (prev.warmupCompletedIds.includes(termId)) return prev;
+      return {
+        ...prev,
+        warmupCompletedIds: [...prev.warmupCompletedIds, termId],
+      };
+    });
+  }, []);
 
   const handleOpenLab = (moduleId: ModuleId) => {
     setSketchRunning(false);
@@ -745,37 +776,42 @@ export function App() {
   };
 
   return (
-    <div
-      className="flex h-[100dvh] w-screen flex-col overflow-hidden bg-white text-[#0A2540]"
-      style={{
-        paddingTop: 'var(--safe-top)',
-        paddingLeft: 'var(--safe-left)',
-        paddingRight: 'var(--safe-right)',
-      }}
-    >
-      <LabHeader
-        activeView={activeView}
-        onSelectView={setActiveView}
-        activeModuleId={activeModuleId}
-        onSelectModule={handleSelectModule}
-        exp={exp}
-        completedDaysCount={progress.completedDays.length}
-        totalCorrect={totalCorrect}
-        totalQuestions={totalQuestions}
-      />
+    <GlossaryProvider onOpenGlossaryModal={handleOpenGlossary}>
+      <div
+        className="flex h-[100dvh] w-screen flex-col overflow-hidden bg-white text-[#0A2540]"
+        style={{
+          paddingTop: 'var(--safe-top)',
+          paddingLeft: 'var(--safe-left)',
+          paddingRight: 'var(--safe-right)',
+        }}
+      >
+        <LabHeader
+          activeView={activeView}
+          onSelectView={setActiveView}
+          activeModuleId={activeModuleId}
+          onSelectModule={handleSelectModule}
+          exp={exp}
+          completedDaysCount={progress.completedDays.length}
+          totalCorrect={totalCorrect}
+          totalQuestions={totalQuestions}
+          warmupDoneCount={progress.warmupCompletedIds.length}
+          onOpenGlossary={(tab) => handleOpenGlossary(tab)}
+        />
 
-      {activeView === 'roadmap' ? (
-        <main className="min-h-0 flex-1 overflow-hidden">
-          <RoadmapHomeView
-            completedDays={progress.completedDays}
-            exp={exp}
-            wrongQuizCount={wrongQuizCount}
-            onOpenLab={handleOpenLab}
-            onOpenWrongQuizModule={handleOpenWrongQuizModule}
-            onToggleDayComplete={handleToggleDayComplete}
-          />
-        </main>
-      ) : (
+        {activeView === 'roadmap' ? (
+          <main className="min-h-0 flex-1 overflow-hidden">
+            <RoadmapHomeView
+              completedDays={progress.completedDays}
+              warmupCompletedIds={progress.warmupCompletedIds}
+              exp={exp}
+              wrongQuizCount={wrongQuizCount}
+              onOpenLab={handleOpenLab}
+              onOpenWrongQuizModule={handleOpenWrongQuizModule}
+              onToggleDayComplete={handleToggleDayComplete}
+              onOpenWarmup={handleOpenGlossary}
+            />
+          </main>
+        ) : (
         /* Responsive Split Workspace: Portrait (Top 44dvh Lab / Bottom Panel) vs Landscape/Desktop (Left 58% Lab / Right 42% Panel) */
         <main className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[44dvh_1fr] lg:grid-cols-[1.35fr_1fr] lg:grid-rows-1">
           <section className="relative min-h-0 w-full">
@@ -817,7 +853,18 @@ export function App() {
           </section>
         </main>
       )}
-    </div>
+      </div>
+
+      <Phase0WarmupModal
+        isOpen={glossaryModal.open}
+        initialTab={glossaryModal.tab}
+        initialTargetId={glossaryModal.targetId}
+        completedWarmupIds={progress.warmupCompletedIds}
+        onCompleteWarmupTerm={handleCompleteWarmupTerm}
+        onStartDay01={() => handleOpenLab('day01_basics')}
+        onClose={() => setGlossaryModal((prev) => ({ ...prev, open: false }))}
+      />
+    </GlossaryProvider>
   );
 }
 

@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { LabModule, TabId } from '../../types/lab';
+import { GlossaryText } from '../GlossaryText';
 import { MathBlock } from '../MathBlock';
 import { MascotSpeechBubble } from '../PixelMascot';
 
@@ -40,14 +41,17 @@ export function OverviewTab({ module, onSelectTab }: OverviewTabProps) {
         </h2>
         <p className="mt-0.5 text-xs text-[#697386]">{module.subtitle}</p>
         <p className="mt-3 text-[13px] leading-relaxed text-[#425466]">
-          {module.overviewSummary}
+          <GlossaryText text={module.overviewSummary} />
+        </p>
+        <p className="mt-2 text-[11px] text-[#697386]">
+          💡 <span className="border-b border-dotted border-[#635BFF]/70 font-medium text-[#0A2540]">점선 밑줄 용어</span>를 누르면 초보자용 1줄 번역이 바로 열립니다.
         </p>
       </header>
 
       {/* 2. Analogy & Fail-First Editorial Callouts (Left Hairline Accents, Zero Cards) */}
       <div className="space-y-4 border-t border-[#ECEEF2] pt-5">
         <MascotSpeechBubble mood="happy" label="10초 일상 비유">
-          {module.beginnerAnalogy}
+          <GlossaryText text={module.beginnerAnalogy} />
         </MascotSpeechBubble>
 
         <div className="border-l-2 border-rose-500 py-0.5 pl-3.5">
@@ -55,7 +59,7 @@ export function OverviewTab({ module, onSelectTab }: OverviewTabProps) {
             이걸 모르면 생기는 고장
           </div>
           <p className="mt-1 text-xs leading-relaxed text-[#425466]">
-            {module.failFirstHook}
+            <GlossaryText text={module.failFirstHook} />
           </p>
         </div>
       </div>
@@ -77,7 +81,7 @@ export function OverviewTab({ module, onSelectTab }: OverviewTabProps) {
               </div>
               {spec.note && (
                 <div className="mt-0.5 text-[11px] text-[#697386]">
-                  {spec.note}
+                  <GlossaryText text={spec.note} />
                 </div>
               )}
             </div>
@@ -97,10 +101,12 @@ export function OverviewTab({ module, onSelectTab }: OverviewTabProps) {
                 <span
                   className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_TONE[item.tone]}`}
                 />
-                <span>{item.title}</span>
+                <span>
+                  <GlossaryText text={item.title} />
+                </span>
               </div>
               <p className="mt-1.5 pl-3.5 text-xs leading-relaxed text-[#425466]">
-                {item.body}
+                <GlossaryText text={item.body} />
               </p>
             </div>
           ))}
@@ -138,7 +144,9 @@ export function OverviewTab({ module, onSelectTab }: OverviewTabProps) {
                     {f.title}
                   </div>
                   <MathBlock latex={f.latex} displayMode />
-                  <p className="text-xs text-[#697386]">{f.description}</p>
+                  <p className="text-xs text-[#697386]">
+                    <GlossaryText text={f.description} />
+                  </p>
                 </div>
               ))}
             </div>

@@ -1,4 +1,4 @@
-import { Smartphone } from 'lucide-react';
+import { BookOpen, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 import { LAB_MODULES } from '../../data/curriculum';
 import { AppView, ModuleId } from '../../types/lab';
@@ -13,6 +13,8 @@ interface LabHeaderProps {
   completedDaysCount: number;
   totalCorrect: number;
   totalQuestions: number;
+  warmupDoneCount: number;
+  onOpenGlossary: (tab: 'warmup' | 'glossary') => void;
 }
 
 export function LabHeader({
@@ -24,6 +26,8 @@ export function LabHeader({
   completedDaysCount,
   totalCorrect,
   totalQuestions,
+  warmupDoneCount,
+  onOpenGlossary,
 }: LabHeaderProps) {
   const [showPwaTip, setShowPwaTip] = useState(false);
 
@@ -87,6 +91,22 @@ export function LabHeader({
             <span className="text-[#D0D5DD]">·</span>
             <span className="font-semibold text-[#635BFF]">{exp} EXP</span>
           </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              onOpenGlossary(warmupDoneCount < 10 ? 'warmup' : 'glossary')
+            }
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E6E8EC] bg-white px-2.5 text-xs font-medium text-[#0A2540] transition hover:bg-[#ECEEF2]"
+          >
+            <BookOpen className="h-3.5 w-3.5 text-[#635BFF]" />
+            <span>용어 사전</span>
+            {warmupDoneCount < 10 && (
+              <span className="hidden rounded bg-[#EEF2FF] px-1 py-0.5 font-mono text-[10px] font-semibold text-[#4F46E5] sm:inline">
+                {warmupDoneCount}/10
+              </span>
+            )}
+          </button>
 
           <button
             type="button"

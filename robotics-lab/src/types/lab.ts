@@ -345,4 +345,54 @@ export interface LearningProgress {
   completedMissions: string[];
   solvedCodeChallenges: string[];
   quizAnswers: Record<string, number>;
+  warmupCompletedIds: string[];
+}
+
+export type GlossaryCategory =
+  | '전기 기초'
+  | '보드·핀'
+  | '신호·통신'
+  | '모터·기구'
+  | '제어·자율'
+  | '기판·디버그';
+
+export interface GlossaryEntry {
+  id: string;
+  term: string;
+  english?: string;
+  category: GlossaryCategory;
+  plainSummary: string;
+  analogy?: string;
+  aliases: string[];
+  warmupId?: string;
+}
+
+export type WarmupVisualType =
+  | 'water_pressure'
+  | 'hose_flow'
+  | 'valve_resistor'
+  | 'closed_loop'
+  | 'breadboard_rails'
+  | 'mcu_brain'
+  | 'gpio_legs'
+  | 'digital_vs_analog'
+  | 'pwm_pulse'
+  | 'serial_chat';
+
+export interface WarmupTerm {
+  id: string;
+  order: number;
+  term: string;
+  english: string;
+  oneLiner: string;
+  analogy: string;
+  whyItMatters: string;
+  boardSighting: string;
+  visualType: WarmupVisualType;
+  quickCheck: {
+    question: string;
+    options: [string, string, string];
+    correctIndex: 0 | 1 | 2;
+    explanation: string;
+  };
 }

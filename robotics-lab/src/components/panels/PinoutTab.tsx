@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ESP32_PINS, PIN_CATEGORY_META } from '../../data/esp32Pins';
 import { LabModule, PinSafetyCategory } from '../../types/lab';
+import { GlossaryText } from '../GlossaryText';
 
 interface PinoutTabProps {
   module: LabModule;
@@ -45,18 +46,18 @@ export function PinoutTab({
             <div key={wire.signal} className="py-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-[#0A2540]">
-                  {wire.signal}
+                  <GlossaryText text={wire.signal} />
                 </span>
                 <span className="rounded bg-[#F1F3F6] px-2 py-0.5 font-mono text-[11px] font-medium text-[#0A2540]">
                   {wire.pin}
                 </span>
               </div>
               <p className="mt-1.5 text-xs leading-relaxed text-[#425466]">
-                {wire.detail}
+                <GlossaryText text={wire.detail} />
               </p>
               {wire.warning && (
                 <p className="mt-2 border-l-2 border-rose-500 pl-2.5 text-[11px] font-medium text-rose-700">
-                  {wire.warning}
+                  <GlossaryText text={wire.warning} />
                 </p>
               )}
             </div>
@@ -88,7 +89,7 @@ export function PinoutTab({
         </div>
 
         <p className="mt-2 text-xs leading-relaxed text-[#425466]">
-          {selectedPin.summary}
+          <GlossaryText text={selectedPin.summary} />
         </p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -116,7 +117,7 @@ export function PinoutTab({
 
         {selectedPin.caution && (
           <div className="mt-2.5 border-l-2 border-amber-500 pl-3 text-xs text-amber-800">
-            {selectedPin.caution}
+            <GlossaryText text={selectedPin.caution} />
           </div>
         )}
       </section>

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LabModule, TabId } from '../../types/lab';
+import { GlossaryText } from '../GlossaryText';
 
 interface CodeTabProps {
   module: LabModule;
@@ -254,7 +255,7 @@ export function CodeTab({
         </div>
 
         <p className="mt-1.5 text-xs leading-relaxed text-[#425466]">
-          {challenge.prompt}
+          <GlossaryText text={challenge.prompt} />
         </p>
 
         <div className="mt-3 rounded-lg bg-[#0A2540] px-3 py-2 font-mono text-xs text-rose-300">
@@ -298,9 +299,11 @@ export function CodeTab({
             }`}
           >
             <strong>{isCorrect ? '정확합니다.' : '다시 선택해 보세요.'}</strong>{' '}
-            {isCorrect
-              ? challenge.explanation
-              : '실제 보드나 공식에서 어떤 문제가 생길지 생각하며 다른 줄을 선택해 보세요.'}
+            {isCorrect ? (
+              <GlossaryText text={challenge.explanation} />
+            ) : (
+              '실제 보드나 공식에서 어떤 문제가 생길지 생각하며 다른 줄을 선택해 보세요.'
+            )}
           </p>
         )}
       </section>

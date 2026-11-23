@@ -1,5 +1,6 @@
 import { CheckCircle2, RotateCcw, XCircle } from 'lucide-react';
 import { LabModule } from '../../types/lab';
+import { GlossaryText } from '../GlossaryText';
 
 interface QuizTabProps {
   module: LabModule;
@@ -59,7 +60,7 @@ export function QuizTab({
                   Q{qIdx + 1}
                 </span>
                 <p className="text-xs font-semibold leading-relaxed text-[#0A2540]">
-                  {q.question}
+                  <GlossaryText text={q.question} />
                 </p>
               </div>
 
@@ -121,7 +122,7 @@ export function QuizTab({
                       ? '정답 (+20 EXP)'
                       : `오답 (정답: ${q.correctIndex + 1}번 · 복습 등록)`}
                   </strong>
-                  {q.explanation}
+                  <GlossaryText text={q.explanation} />
                 </p>
               )}
             </div>

@@ -6,9 +6,11 @@ import {
   Circle,
   FlaskConical,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { LAB_MODULES } from '../../data/curriculum';
+import { PHASE0_WARMUP_TERMS } from '../../data/phase0Warmup';
 import {
   PHASE_LIST,
   ROADMAP_45_DAYS,
@@ -19,22 +21,28 @@ import { DaySyllabusModal } from './DaySyllabusModal';
 
 interface RoadmapHomeViewProps {
   completedDays: number[];
+  warmupCompletedIds: string[];
   exp: number;
   wrongQuizCount: number;
   onOpenLab: (moduleId: ModuleId, dayNum?: number) => void;
   onOpenWrongQuizModule: () => void;
   onToggleDayComplete: (dayNum: number) => void;
+  onOpenWarmup: (tab: 'warmup' | 'glossary', targetId?: string) => void;
 }
 
 export function RoadmapHomeView({
   completedDays,
+  warmupCompletedIds,
   exp,
   wrongQuizCount,
   onOpenLab,
   onOpenWrongQuizModule,
   onToggleDayComplete,
+  onOpenWarmup,
 }: RoadmapHomeViewProps) {
-  const [selectedPhase, setSelectedPhase] = useState<'all' | PhaseId>('all');
+  const [selectedPhase, setSelectedPhase] = useState<'all' | 'phase0' | PhaseId>(
+    'all',
+  );
   const [openDisclosure, setOpenDisclosure] = useState<
     'none' | 'guide' | 'skills'
   >('none');
@@ -49,8 +57,13 @@ export function RoadmapHomeView({
 
   const visiblePhases = useMemo(() => {
     if (selectedPhase === 'all') return PHASE_LIST;
+    if (selectedPhase === 'phase0') return [];
     return PHASE_LIST.filter((p) => p.id === selectedPhase);
   }, [selectedPhase]);
+
+  const warmupClearedCount = PHASE0_WARMUP_TERMS.filter((t) =>
+    warmupCompletedIds.includes(t.id),
+  ).length;
 
   const level = Math.floor(exp / 100) + 1;
   const overallPct = Math.round(
@@ -95,6 +108,20 @@ export function RoadmapHomeView({
               >
                 <span>전체 45일 과정</span>
                 <span className="font-mono text-[11px] text-[#697386]">45</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedPhase('phase0')}
+                className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs font-medium transition ${
+                  selectedPhase === 'phase0'
+                    ? 'bg-[#ECEEF2] text-[#0A2540]'
+                    : 'text-[#425466] hover:bg-black/[0.03] hover:text-[#0A2540]'
+                }`}
+              >
+                <span className="truncate">0단계 · 3분 워밍업</span>
+                <span className="font-mono text-[11px] text-[#635BFF]">
+                  {warmupClearedCount}/10
+                </span>
               </button>
               {PHASE_LIST.map((phase) => {
                 const active = selectedPhase === phase.id;
@@ -163,6 +190,17 @@ export function RoadmapHomeView({
           >
             전체 45일
           </button>
+          <button
+            type="button"
+            onClick={() => setSelectedPhase('phase0')}
+            className={`shrink-0 rounded-md px-2.5 py-1 font-mono text-xs font-medium ${
+              selectedPhase === 'phase0'
+                ? 'bg-white text-[#635BFF] shadow-[0_1px_2px_rgba(10,37,64,0.06)]'
+                : 'text-[#697386]'
+            }`}
+          >
+            P0
+          </button>
           {PHASE_LIST.map((phase) => (
             <button
               key={phase.id}
@@ -196,7 +234,7 @@ export function RoadmapHomeView({
               매일 하나의 주제를 아이소메트릭 3D 실험실과 코드·트러블슈팅 퀴즈로 익힙니다.
             </p>
 
-            {/* Primary CTA + Quiet Secondary Disclosures */}
+            {/* Primary CTA + Phase 0 Warmup + Quiet Secondary Disclosures */}
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <button
                 type="button"
@@ -218,6 +256,17 @@ export function RoadmapHomeView({
                     : `Day ${String(nextRecommendedDay.day).padStart(2, '0')} 이어서 학습`}
                 </span>
                 <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onOpenWarmup('warmup')}
+                className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#E6E8EC] bg-[#F7F8FA] px-3.5 text-xs font-semibold text-[#0A2540] transition hover:border-[#635BFF]/40 hover:bg-[#EEF2FF]/70"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-[#635BFF]" />
+                <span>
+                  Phase 0 · 필수 용어 3분 워밍업 ({warmupClearedCount}/10)
+                </span>
               </button>
 
               {wrongQuizCount > 0 && (
@@ -349,6 +398,96 @@ export function RoadmapHomeView({
 
           {/* Linear-style Clean Hairline List of Phases & 45 Days */}
           <div className="mt-8 space-y-10">
+            {(selectedPhase === 'all' || selectedPhase === 'phase0') && (
+              <section>
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[11px] font-semibold text-[#635BFF]">
+                        Phase 0 · 약 3분
+                      </span>
+                      <h3 className="text-sm font-semibold text-[#0A2540] sm:text-base">
+                        Day 01 시작 전 워밍업: 필수 용어 10개
+                      </h3>
+                    </div>
+                    <p className="mt-0.5 text-xs text-[#697386]">
+                      어려운 공학 단어 10개만 일상 비유로 3분 안에 훑고 시작하면 Day 01부터 막히지 않습니다.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-xs tabular-nums text-[#697386]">
+                      {warmupClearedCount}/10
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onOpenWarmup('warmup')}
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#0A2540] px-3 text-[11px] font-semibold text-white transition hover:bg-[#163459]"
+                    >
+                      <Sparkles className="h-3 w-3 text-[#A5B4FC]" />
+                      <span>
+                        {warmupClearedCount === 10
+                          ? '다시 복습하기'
+                          : '3분 워밍업 시작'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="divide-y divide-[#ECEEF2] border-y border-[#E6E8EC]">
+                  {PHASE0_WARMUP_TERMS.map((item) => {
+                    const isDone = warmupCompletedIds.includes(item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => onOpenWarmup('warmup', item.id)}
+                        className="group flex w-full items-center justify-between gap-3 px-2 py-2.5 text-left transition hover:bg-[#F7F8FA]"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          {isDone ? (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                          ) : (
+                            <Circle className="h-4 w-4 shrink-0 text-[#D0D5DD] group-hover:text-[#98A2B3]" />
+                          )}
+
+                          <span className="w-9 shrink-0 font-mono text-[11px] font-medium text-[#635BFF]">
+                            T{String(item.order).padStart(2, '0')}
+                          </span>
+
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-baseline gap-2">
+                              <span
+                                className={`text-[13px] font-medium ${
+                                  isDone
+                                    ? 'text-[#697386]'
+                                    : 'text-[#0A2540] group-hover:text-[#635BFF]'
+                                }`}
+                              >
+                                {item.term}
+                              </span>
+                              <span className="font-mono text-[11px] text-[#697386]">
+                                {item.english}
+                              </span>
+                            </div>
+                            <div className="truncate text-[11px] text-[#697386]">
+                              {item.oneLiner}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-2">
+                          <span className="hidden rounded bg-[#EEF2FF] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#4F46E5] sm:inline-block">
+                            3분 카드
+                          </span>
+                          <ChevronRight className="h-3.5 w-3.5 text-[#CBD5E1] transition group-hover:translate-x-0.5 group-hover:text-[#697386]" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {visiblePhases.map((phase) => {
               const phaseDays = ROADMAP_45_DAYS.filter(
                 (d) => d.phaseId === phase.id,
