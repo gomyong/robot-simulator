@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronRight,
   Circle,
+  Cpu,
   FlaskConical,
   RotateCcw,
   Sparkles,
@@ -22,9 +23,11 @@ import { DaySyllabusModal } from './DaySyllabusModal';
 interface RoadmapHomeViewProps {
   completedDays: number[];
   warmupCompletedIds: string[];
+  masteredBoardsCount: number;
   exp: number;
   wrongQuizCount: number;
   onOpenLab: (moduleId: ModuleId, dayNum?: number) => void;
+  onOpenBoards: () => void;
   onOpenWrongQuizModule: () => void;
   onToggleDayComplete: (dayNum: number) => void;
   onOpenWarmup: (tab: 'warmup' | 'glossary', targetId?: string) => void;
@@ -33,9 +36,11 @@ interface RoadmapHomeViewProps {
 export function RoadmapHomeView({
   completedDays,
   warmupCompletedIds,
+  masteredBoardsCount,
   exp,
   wrongQuizCount,
   onOpenLab,
+  onOpenBoards,
   onOpenWrongQuizModule,
   onToggleDayComplete,
   onOpenWarmup,
@@ -150,6 +155,25 @@ export function RoadmapHomeView({
           </div>
 
           {/* Live 3D Labs Quick Access (like Linear Favorites) */}
+          <div>
+            <div className="px-2 text-[11px] font-medium text-[#697386]">
+              3D 보드 도감
+            </div>
+            <button
+              type="button"
+              onClick={onOpenBoards}
+              className="mt-1.5 flex w-full items-center justify-between rounded-md bg-white px-2.5 py-2 text-left text-xs font-semibold text-[#0A2540] ring-1 ring-inset ring-[#E6E8EC] transition hover:ring-[#635BFF]"
+            >
+              <span className="flex items-center gap-2">
+                <Cpu className="h-3.5 w-3.5 text-[#635BFF]" />
+                <span>대표 보드 8종 3D</span>
+              </span>
+              <span className="font-mono text-[10px] text-[#635BFF]">
+                {masteredBoardsCount}/8
+              </span>
+            </button>
+          </div>
+
           <div>
             <div className="px-2 text-[11px] font-medium text-[#697386]">
               인터랙티브 실습실 ({LAB_MODULES.length})
@@ -267,6 +291,15 @@ export function RoadmapHomeView({
                 <span>
                   Phase 0 · 필수 용어 3분 워밍업 ({warmupClearedCount}/10)
                 </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onOpenBoards}
+                className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#E6E8EC] bg-white px-3.5 text-xs font-semibold text-[#0A2540] transition hover:border-[#635BFF]/40 hover:bg-[#F7F8FA]"
+              >
+                <Cpu className="h-3.5 w-3.5 text-[#635BFF]" />
+                <span>8종 보드 3D 도감 ({masteredBoardsCount}/8)</span>
               </button>
 
               {wrongQuizCount > 0 && (

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { GlossaryProvider } from './components/GlossaryText';
+import { BoardsStudioView } from './components/boards/BoardsStudioView';
 import { InspectorPanel } from './components/panels/InspectorPanel';
 import { LabHeader } from './components/panels/LabHeader';
 import { Phase0WarmupModal } from './components/roadmap/Phase0WarmupModal';
@@ -8,6 +9,7 @@ import { LabViewport } from './components/viewport/LabViewport';
 import { LAB_MODULES } from './data/curriculum';
 import {
   AppView,
+  BoardId,
   LabPreviewState,
   LearningProgress,
   ModuleId,
@@ -39,6 +41,9 @@ function loadInitialProgress(): LearningProgress {
         warmupCompletedIds: Array.isArray(parsed.warmupCompletedIds)
           ? parsed.warmupCompletedIds
           : [],
+        masteredBoardIds: Array.isArray(parsed.masteredBoardIds)
+          ? parsed.masteredBoardIds
+          : [],
       };
     }
 
@@ -51,6 +56,7 @@ function loadInitialProgress(): LearningProgress {
         ? (JSON.parse(legacyQuiz) as Record<string, number>)
         : {},
       warmupCompletedIds: [],
+      masteredBoardIds: [],
     };
   } catch {
     return {
@@ -59,6 +65,7 @@ function loadInitialProgress(): LearningProgress {
       solvedCodeChallenges: [],
       quizAnswers: {},
       warmupCompletedIds: [],
+      masteredBoardIds: [],
     };
   }
 }
@@ -284,7 +291,8 @@ export function App() {
       progress.solvedCodeChallenges.length * 15 +
       totalCorrect * 20 +
       progress.completedDays.length * 50 +
-      progress.warmupCompletedIds.length * 5
+      progress.warmupCompletedIds.length * 5 +
+      progress.masteredBoardIds.length * 15
     );
   }, [
     progress.completedMissions.length,
@@ -292,6 +300,7 @@ export function App() {
     totalCorrect,
     progress.completedDays.length,
     progress.warmupCompletedIds.length,
+    progress.masteredBoardIds.length,
   ]);
 
   const handleOpenGlossary = useCallback(
@@ -307,6 +316,16 @@ export function App() {
       return {
         ...prev,
         warmupCompletedIds: [...prev.warmupCompletedIds, termId],
+      };
+    });
+  }, []);
+
+  const handleMasterBoard = useCallback((boardId: BoardId) => {
+    setProgress((prev) => {
+      if (prev.masteredBoardIds.includes(boardId)) return prev;
+      return {
+        ...prev,
+        masteredBoardIds: [...prev.masteredBoardIds, boardId],
       };
     });
   }, []);
@@ -803,12 +822,22 @@ export function App() {
             <RoadmapHomeView
               completedDays={progress.completedDays}
               warmupCompletedIds={progress.warmupCompletedIds}
+              masteredBoardsCount={progress.masteredBoardIds.length}
               exp={exp}
               wrongQuizCount={wrongQuizCount}
               onOpenLab={handleOpenLab}
+              onOpenBoards={() => setActiveView('boards')}
               onOpenWrongQuizModule={handleOpenWrongQuizModule}
               onToggleDayComplete={handleToggleDayComplete}
               onOpenWarmup={handleOpenGlossary}
+            />
+          </main>
+        ) : activeView === 'boards' ? (
+          <main className="min-h-0 flex-1 overflow-hidden">
+            <BoardsStudioView
+              masteredBoardIds={progress.masteredBoardIds}
+              onMasterBoard={handleMasterBoard}
+              onOpenLab={handleOpenLab}
             />
           </main>
         ) : (

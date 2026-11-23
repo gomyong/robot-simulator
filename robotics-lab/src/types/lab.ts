@@ -46,7 +46,77 @@ export type ModuleId =
 
 export type TabId = 'overview' | 'controls' | 'pinout' | 'code' | 'quiz';
 
-export type AppView = 'roadmap' | 'lab';
+export type AppView = 'roadmap' | 'lab' | 'boards';
+
+export type BoardId =
+  | 'uno'
+  | 'nano'
+  | 'mega'
+  | 'esp32'
+  | 'esp8266'
+  | 'pico'
+  | 'stm32'
+  | 'pi4';
+
+export type BoardCameraPreset = 'iso' | 'top' | 'bottom' | 'front';
+
+export type BoardDifficulty = 'beginner' | 'intermediate' | 'advanced';
+
+export type BoardPartCategory =
+  | '두뇌 칩(MCU)'
+  | '전원·변압'
+  | '통신·USB'
+  | '입출력 핀'
+  | '조작·표시'
+  | '무선·확장';
+
+export interface BoardPartSpec {
+  id: string;
+  label: string;
+  title: string;
+  category: BoardPartCategory;
+  beginnerDesc: string;
+  analogy: string;
+  findPrompt: string;
+  color: string;
+  /** Position on PCB surface [x, y, z] */
+  pos: [number, number, number];
+  /** Offset added when exploded [dx, dy, dz] */
+  explodeOffset: [number, number, number];
+  focusTarget: [number, number, number];
+  focusZoom: number;
+}
+
+export interface BoardSpec {
+  id: BoardId;
+  order: number;
+  name: string;
+  shortName: string;
+  maker: string;
+  year: number;
+  tagline: string;
+  difficulty: BoardDifficulty;
+  difficultyLabel: string;
+  pcbColor: string;
+  pcbAccent: string;
+  pcbSize: [number, number, number]; // [width, thickness, length]
+  logicVoltage: '5V' | '3.3V';
+  inputVoltage: string;
+  cpu: string;
+  memory: string;
+  gpioSummary: string;
+  digitalPins: number;
+  analogPins: number;
+  wireless: string;
+  priceApprox: string;
+  beginnerSummary: string;
+  analogy: string;
+  bestFor: string;
+  watchOut: string;
+  useCaseTags: ('starter' | 'wireless' | 'compact' | 'many_pins' | 'vision_ros')[];
+  connectedDay?: { moduleId: ModuleId; dayNum: number; label: string };
+  parts: BoardPartSpec[];
+}
 
 export type PhaseId =
   | 'phase1'
@@ -346,6 +416,7 @@ export interface LearningProgress {
   solvedCodeChallenges: string[];
   quizAnswers: Record<string, number>;
   warmupCompletedIds: string[];
+  masteredBoardIds: BoardId[];
 }
 
 export type GlossaryCategory =

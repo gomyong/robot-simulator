@@ -35,14 +35,14 @@ export function LabHeader({
     <header className="relative z-20 border-b border-[#E6E8EC] bg-[#F7F8FA]">
       <div className="flex h-12 items-center justify-between gap-3 px-3 sm:px-5">
         {/* Left: Minimal Brand + Segmented View Switch */}
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
           <button
             type="button"
             onClick={() => onSelectView('roadmap')}
-            className="flex items-center gap-2 text-left transition hover:opacity-80"
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap text-left transition hover:opacity-80"
           >
             <PixelMascot mood="idle" size="sm" />
-            <span className="text-sm font-semibold tracking-tight text-[#0A2540]">
+            <span className="hidden text-sm font-semibold tracking-tight text-[#0A2540] sm:inline">
               Robotics Lab
             </span>
           </button>
@@ -51,12 +51,12 @@ export function LabHeader({
 
           <nav
             aria-label="화면 전환"
-            className="flex items-center gap-1 rounded-lg bg-[#ECEEF2] p-0.5"
+            className="flex shrink-0 items-center gap-1 rounded-lg bg-[#ECEEF2] p-0.5"
           >
             <button
               type="button"
               onClick={() => onSelectView('roadmap')}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+              className={`shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition ${
                 activeView === 'roadmap'
                   ? 'bg-white text-[#0A2540] shadow-[0_1px_2px_rgba(10,37,64,0.06)]'
                   : 'text-[#697386] hover:text-[#0A2540]'
@@ -67,7 +67,7 @@ export function LabHeader({
             <button
               type="button"
               onClick={() => onSelectView('lab')}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+              className={`shrink-0 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition ${
                 activeView === 'lab'
                   ? 'bg-white text-[#0A2540] shadow-[0_1px_2px_rgba(10,37,64,0.06)]'
                   : 'text-[#697386] hover:text-[#0A2540]'
@@ -75,12 +75,26 @@ export function LabHeader({
             >
               3D 실습실
             </button>
+            <button
+              type="button"
+              onClick={() => onSelectView('boards')}
+              className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                activeView === 'boards'
+                  ? 'bg-white text-[#0A2540] shadow-[0_1px_2px_rgba(10,37,64,0.06)]'
+                  : 'text-[#697386] hover:text-[#0A2540]'
+              }`}
+            >
+              <span>보드 도감</span>
+              <span className="hidden rounded bg-[#EEF2FF] px-1 py-0.2 font-mono text-[9px] font-semibold text-[#4F46E5] sm:inline">
+                8종
+              </span>
+            </button>
           </nav>
         </div>
 
         {/* Right: Quiet Monospace Telemetry + iPad Install */}
-        <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2.5 font-mono text-[11px] tabular-nums text-[#697386] sm:flex">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="hidden items-center gap-2.5 whitespace-nowrap font-mono text-[11px] tabular-nums text-[#697386] lg:flex">
             <span>
               Day <strong className="font-semibold text-[#0A2540]">{completedDaysCount}</strong>/45
             </span>
@@ -97,7 +111,7 @@ export function LabHeader({
             onClick={() =>
               onOpenGlossary(warmupDoneCount < 10 ? 'warmup' : 'glossary')
             }
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-[#E6E8EC] bg-white px-2.5 text-xs font-medium text-[#0A2540] transition hover:bg-[#ECEEF2]"
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-[#E6E8EC] bg-white px-2.5 text-xs font-medium text-[#0A2540] transition hover:bg-[#ECEEF2]"
           >
             <BookOpen className="h-3.5 w-3.5 text-[#635BFF]" />
             <span>용어 사전</span>
@@ -111,7 +125,7 @@ export function LabHeader({
           <button
             type="button"
             onClick={() => setShowPwaTip((v) => !v)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-[#425466] transition hover:bg-[#ECEEF2] hover:text-[#0A2540]"
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-xs font-medium text-[#425466] transition hover:bg-[#ECEEF2] hover:text-[#0A2540]"
           >
             <Smartphone className="h-3.5 w-3.5 text-[#697386]" />
             <span className="hidden md:inline">iPad 앱 설치</span>
