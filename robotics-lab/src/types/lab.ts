@@ -46,7 +46,7 @@ export type ModuleId =
 
 export type TabId = 'overview' | 'controls' | 'pinout' | 'code' | 'quiz';
 
-export type AppView = 'roadmap' | 'lab' | 'boards';
+export type AppView = 'roadmap' | 'lab' | 'boards' | 'workbench';
 
 export type BoardId =
   | 'uno'
@@ -417,6 +417,83 @@ export interface LearningProgress {
   quizAnswers: Record<string, number>;
   warmupCompletedIds: string[];
   masteredBoardIds: BoardId[];
+  completedWorkbenchMissions: string[];
+}
+
+export type WbPinRole =
+  | 'power_5v'
+  | 'power_3v3'
+  | 'vin'
+  | 'gnd'
+  | 'gpio'
+  | 'input_only'
+  | 'prohibited';
+
+export interface WbBoardPin {
+  id: string;
+  label: string;
+  gpio: number | null;
+  role: WbPinRole;
+  pwm: boolean;
+  adc: boolean;
+  adc2WifiConflict?: boolean;
+  note?: string;
+  /** Position on SVG board [x, y] relative to board center (0,0) */
+  x: number;
+  y: number;
+  side: 'left' | 'right' | 'bottom';
+}
+
+export type WbComponentType =
+  | 'led'
+  | 'resistor_220'
+  | 'button'
+  | 'hcsr04'
+  | 'divider'
+  | 'servo'
+  | 'pot'
+  | 'battery_5v';
+
+export interface WbComponentPinDef {
+  id: string;
+  label: string;
+  /** Offset relative to component origin [x, y] */
+  x: number;
+  y: number;
+  kind: 'power' | 'gnd' | 'signal_in' | 'signal_out' | 'passive';
+}
+
+export interface WbComponentInstance {
+  uid: string;
+  type: WbComponentType;
+  slotIndex: number;
+  label: string;
+}
+
+export interface WbWire {
+  id: string;
+  fromRef: string; // e.g. "board:D13" or "comp1:anode"
+  toRef: string;
+  color: string;
+}
+
+export interface WbDiagnostic {
+  id: string;
+  severity: 'danger' | 'warning' | 'ok';
+  title: string;
+  detail: string;
+  relatedDay?: { moduleId: ModuleId; dayNum: number; label: string };
+}
+
+export interface WbMissionPreset {
+  id: string;
+  title: string;
+  subtitle: string;
+  recommendedBoard: BoardId;
+  goalText: string;
+  components: { uid: string; type: WbComponentType; slotIndex: number }[];
+  wires: WbWire[];
+  starterModeLabel: string;
 }
 
 export type GlossaryCategory =

@@ -6,6 +6,7 @@ import { LabHeader } from './components/panels/LabHeader';
 import { Phase0WarmupModal } from './components/roadmap/Phase0WarmupModal';
 import { RoadmapHomeView } from './components/roadmap/RoadmapHomeView';
 import { LabViewport } from './components/viewport/LabViewport';
+import { WorkbenchStudioView } from './components/workbench/WorkbenchStudioView';
 import { LAB_MODULES } from './data/curriculum';
 import {
   AppView,
@@ -44,6 +45,11 @@ function loadInitialProgress(): LearningProgress {
         masteredBoardIds: Array.isArray(parsed.masteredBoardIds)
           ? parsed.masteredBoardIds
           : [],
+        completedWorkbenchMissions: Array.isArray(
+          parsed.completedWorkbenchMissions,
+        )
+          ? parsed.completedWorkbenchMissions
+          : [],
       };
     }
 
@@ -57,6 +63,7 @@ function loadInitialProgress(): LearningProgress {
         : {},
       warmupCompletedIds: [],
       masteredBoardIds: [],
+      completedWorkbenchMissions: [],
     };
   } catch {
     return {
@@ -66,6 +73,7 @@ function loadInitialProgress(): LearningProgress {
       quizAnswers: {},
       warmupCompletedIds: [],
       masteredBoardIds: [],
+      completedWorkbenchMissions: [],
     };
   }
 }
@@ -76,6 +84,7 @@ export function App() {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [selectedPinId, setSelectedPinId] = useState<string | null>('GPIO32');
   const [sketchRunning, setSketchRunning] = useState(false);
+  const [workbenchBoardId, setWorkbenchBoardId] = useState<BoardId>('esp32');
   const [glossaryModal, setGlossaryModal] = useState<{
     open: boolean;
     tab: 'warmup' | 'glossary';
@@ -292,7 +301,8 @@ export function App() {
       totalCorrect * 20 +
       progress.completedDays.length * 50 +
       progress.warmupCompletedIds.length * 5 +
-      progress.masteredBoardIds.length * 15
+      progress.masteredBoardIds.length * 15 +
+      progress.completedWorkbenchMissions.length * 20
     );
   }, [
     progress.completedMissions.length,
@@ -301,6 +311,7 @@ export function App() {
     progress.completedDays.length,
     progress.warmupCompletedIds.length,
     progress.masteredBoardIds.length,
+    progress.completedWorkbenchMissions.length,
   ]);
 
   const handleOpenGlossary = useCallback(
@@ -328,6 +339,24 @@ export function App() {
         masteredBoardIds: [...prev.masteredBoardIds, boardId],
       };
     });
+  }, []);
+
+  const handleCompleteWorkbenchMission = useCallback((missionId: string) => {
+    setProgress((prev) => {
+      if (prev.completedWorkbenchMissions.includes(missionId)) return prev;
+      return {
+        ...prev,
+        completedWorkbenchMissions: [
+          ...prev.completedWorkbenchMissions,
+          missionId,
+        ],
+      };
+    });
+  }, []);
+
+  const handleOpenWorkbenchWithBoard = useCallback((boardId: BoardId) => {
+    setWorkbenchBoardId(boardId);
+    setActiveView('workbench');
   }, []);
 
   const handleOpenLab = (moduleId: ModuleId) => {
@@ -823,10 +852,12 @@ export function App() {
               completedDays={progress.completedDays}
               warmupCompletedIds={progress.warmupCompletedIds}
               masteredBoardsCount={progress.masteredBoardIds.length}
+              workbenchSolvedCount={progress.completedWorkbenchMissions.length}
               exp={exp}
               wrongQuizCount={wrongQuizCount}
               onOpenLab={handleOpenLab}
               onOpenBoards={() => setActiveView('boards')}
+              onOpenWorkbench={() => setActiveView('workbench')}
               onOpenWrongQuizModule={handleOpenWrongQuizModule}
               onToggleDayComplete={handleToggleDayComplete}
               onOpenWarmup={handleOpenGlossary}
@@ -837,6 +868,16 @@ export function App() {
             <BoardsStudioView
               masteredBoardIds={progress.masteredBoardIds}
               onMasterBoard={handleMasterBoard}
+              onOpenLab={handleOpenLab}
+              onOpenWorkbench={handleOpenWorkbenchWithBoard}
+            />
+          </main>
+        ) : activeView === 'workbench' ? (
+          <main className="min-h-0 flex-1 overflow-hidden">
+            <WorkbenchStudioView
+              initialBoardId={workbenchBoardId}
+              completedMissionIds={progress.completedWorkbenchMissions}
+              onCompleteMission={handleCompleteWorkbenchMission}
               onOpenLab={handleOpenLab}
             />
           </main>

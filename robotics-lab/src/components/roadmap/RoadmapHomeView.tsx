@@ -8,6 +8,7 @@ import {
   FlaskConical,
   RotateCcw,
   Sparkles,
+  Wrench,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { LAB_MODULES } from '../../data/curriculum';
@@ -24,10 +25,12 @@ interface RoadmapHomeViewProps {
   completedDays: number[];
   warmupCompletedIds: string[];
   masteredBoardsCount: number;
+  workbenchSolvedCount: number;
   exp: number;
   wrongQuizCount: number;
   onOpenLab: (moduleId: ModuleId, dayNum?: number) => void;
   onOpenBoards: () => void;
+  onOpenWorkbench: () => void;
   onOpenWrongQuizModule: () => void;
   onToggleDayComplete: (dayNum: number) => void;
   onOpenWarmup: (tab: 'warmup' | 'glossary', targetId?: string) => void;
@@ -37,10 +40,12 @@ export function RoadmapHomeView({
   completedDays,
   warmupCompletedIds,
   masteredBoardsCount,
+  workbenchSolvedCount,
   exp,
   wrongQuizCount,
   onOpenLab,
   onOpenBoards,
+  onOpenWorkbench,
   onOpenWrongQuizModule,
   onToggleDayComplete,
   onOpenWarmup,
@@ -157,21 +162,36 @@ export function RoadmapHomeView({
           {/* Live 3D Labs Quick Access (like Linear Favorites) */}
           <div>
             <div className="px-2 text-[11px] font-medium text-[#697386]">
-              3D 보드 도감
+              보드 &amp; 조립 작업대
             </div>
-            <button
-              type="button"
-              onClick={onOpenBoards}
-              className="mt-1.5 flex w-full items-center justify-between rounded-md bg-white px-2.5 py-2 text-left text-xs font-semibold text-[#0A2540] ring-1 ring-inset ring-[#E6E8EC] transition hover:ring-[#635BFF]"
-            >
-              <span className="flex items-center gap-2">
-                <Cpu className="h-3.5 w-3.5 text-[#635BFF]" />
-                <span>대표 보드 8종 3D</span>
-              </span>
-              <span className="font-mono text-[10px] text-[#635BFF]">
-                {masteredBoardsCount}/8
-              </span>
-            </button>
+            <div className="mt-1.5 space-y-1.5">
+              <button
+                type="button"
+                onClick={onOpenBoards}
+                className="flex w-full items-center justify-between rounded-md bg-white px-2.5 py-2 text-left text-xs font-semibold text-[#0A2540] ring-1 ring-inset ring-[#E6E8EC] transition hover:ring-[#635BFF]"
+              >
+                <span className="flex items-center gap-2">
+                  <Cpu className="h-3.5 w-3.5 text-[#635BFF]" />
+                  <span>대표 보드 8종 3D</span>
+                </span>
+                <span className="font-mono text-[10px] text-[#635BFF]">
+                  {masteredBoardsCount}/8
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={onOpenWorkbench}
+                className="flex w-full items-center justify-between rounded-md bg-white px-2.5 py-2 text-left text-xs font-semibold text-[#0A2540] ring-1 ring-inset ring-[#E6E8EC] transition hover:ring-[#635BFF]"
+              >
+                <span className="flex items-center gap-2">
+                  <Wrench className="h-3.5 w-3.5 text-[#635BFF]" />
+                  <span>조립 작업대 (배선)</span>
+                </span>
+                <span className="font-mono text-[10px] text-[#635BFF]">
+                  {workbenchSolvedCount}/4
+                </span>
+              </button>
+            </div>
           </div>
 
           <div>

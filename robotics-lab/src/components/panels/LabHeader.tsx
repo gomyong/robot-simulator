@@ -89,6 +89,17 @@ export function LabHeader({
                 8종
               </span>
             </button>
+            <button
+              type="button"
+              onClick={() => onSelectView('workbench')}
+              className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                activeView === 'workbench'
+                  ? 'bg-white text-[#0A2540] shadow-[0_1px_2px_rgba(10,37,64,0.06)]'
+                  : 'text-[#697386] hover:text-[#0A2540]'
+              }`}
+            >
+              <span>조립 작업대</span>
+            </button>
           </nav>
         </div>
 

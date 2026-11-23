@@ -13,6 +13,7 @@ import {
   Sparkles,
   Tag,
   Wifi,
+  Wrench,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -33,6 +34,7 @@ interface BoardsStudioViewProps {
   masteredBoardIds: BoardId[];
   onMasterBoard: (boardId: BoardId) => void;
   onOpenLab: (moduleId: ModuleId, dayNum?: number) => void;
+  onOpenWorkbench: (boardId: BoardId) => void;
 }
 
 const BOARD_CAMERA_PRESETS: Record<
@@ -132,6 +134,7 @@ export function BoardsStudioView({
   masteredBoardIds,
   onMasterBoard,
   onOpenLab,
+  onOpenWorkbench,
 }: BoardsStudioViewProps) {
   const [subView, setSubView] = useState<'explore' | 'compare'>('explore');
   const [activeBoardId, setActiveBoardId] = useState<BoardId>('uno');
@@ -788,9 +791,19 @@ export function BoardsStudioView({
                 </div>
               </section>
 
-              {/* Curriculum Bridge CTA */}
-              {activeBoard.connectedDay && (
-                <div className="border-t border-[#E6E8EC] pt-4">
+              {/* Workbench & Curriculum Bridge CTAs */}
+              <div className="space-y-2 border-t border-[#E6E8EC] pt-4">
+                <button
+                  type="button"
+                  onClick={() => onOpenWorkbench(activeBoard.id)}
+                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#0A2540] px-4 text-xs font-semibold text-white transition hover:bg-[#163459]"
+                >
+                  <Wrench className="h-3.5 w-3.5 text-[#A5B4FC]" />
+                  <span>작업대에서 {activeBoard.shortName} 배선하기</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+
+                {activeBoard.connectedDay && (
                   <button
                     type="button"
                     onClick={() =>
@@ -799,14 +812,14 @@ export function BoardsStudioView({
                         activeBoard.connectedDay!.dayNum,
                       )
                     }
-                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-[#635BFF] px-4 text-xs font-semibold text-white transition hover:bg-[#5249F5]"
+                    className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-[#E6E8EC] bg-white px-4 text-xs font-semibold text-[#635BFF] transition hover:bg-[#EEF2FF]/60"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
                     <span>{activeBoard.connectedDay.label}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </aside>
         </div>
